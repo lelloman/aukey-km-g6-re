@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+usage()
+{
+    cat <<'EOF'
+AUKEY KM-G6 lighting controller
+
+Usage:
+  km-g6 on
+  km-g6 off
+  km-g6 brightness 0..4
+  km-g6 effect 1..9
+  km-g6 speed 0..4
+  km-g6 keys KEY...
+  km-g6 keys all
+  km-g6 keys none
+  km-g6 hold SECONDS KEY...
+  km-g6 list
+
+Brightness 0 is off and 4 is full.
+EOF
+}
+
+list_effects()
+{
+    cat <<'EOF'
+ 1..9  raw firmware effect number (names are being calibrated)
+EOF
+}
+
+mode_number()
+{
+    case $1 in
+        [1-9]) echo "$1" ;;
+        *) echo "Unknown effect: $1" >&2; exit 2 ;;
+    esac
+}
+
+if [[ $# -eq 0 ]]; then
+    usage
+    exit 2
+fi
+
+case $1 in
+    list)
+        list_effects
+        exit 0
+        ;;
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+esac
+
+if [[ ${EUID} -ne 0 ]]; then
+    exec sudo -- "$0" "$@"
+fi
+
+make -s -C "$script_dir" km-g6ctl km-g6-keys
+
+hidraw_node=""
+for uevent in /sys/class/hidraw/hidraw*/device/uevent; do
+    [[ -r "$uevent" ]] || continue
+    if grep -q '^HID_ID=0003:0000258A:0000002A$' "$uevent" \
+        && grep -q 'HID_PHYS=.*input1$' "$uevent"; then
+        hidraw_node="/dev/$(basename "$(dirname "$(dirname "$uevent")")")"
+        break
+    fi
+done
+
+if [[ -z "$hidraw_node" || ! -c "$hidraw_node" ]]; then
+    echo "AUKEY KM-G6 vendor HID interface not found." >&2
+    exit 1
+fi
+
+case $1 in
+    on)
+        [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+        exec "$script_dir/km-g6ctl" "$hidraw_node" brightness 4
+        ;;
+    off)
+        [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+        exec "$script_dir/km-g6ctl" "$hidraw_node" brightness 0
+        ;;
+    brightness)
+        [[ $# -eq 2 ]] || { usage >&2; exit 2; }
+        exec "$script_dir/km-g6ctl" "$hidraw_node" brightness "$2"
+        ;;
+    speed)
+        [[ $# -eq 2 ]] || { usage >&2; exit 2; }
+        exec "$script_dir/km-g6ctl" "$hidraw_node" speed "$2"
+        ;;
+    effect)
+        [[ $# -eq 2 ]] || { usage >&2; exit 2; }
+        mode=$(mode_number "$2")
+        exec "$script_dir/km-g6ctl" "$hidraw_node" mode "$mode"
+        ;;
+    keys)
+        [[ $# -ge 2 ]] || { usage >&2; exit 2; }
+        shift
+        if [[ $1 == all ]]; then
+            exec "$script_dir/km-g6-keys" "$hidraw_node" --all
+        elif [[ $1 == none ]]; then
+            exec "$script_dir/km-g6-keys" "$hidraw_node" --clear
+        else
+            exec "$script_dir/km-g6-keys" "$hidraw_node" "$@"
+        fi
+        ;;
+    hold)
+        [[ $# -ge 3 ]] || { usage >&2; exit 2; }
+        duration=$2
+        shift 2
+        exec "$script_dir/km-g6-keys" "$hidraw_node" --duration "$duration" "$@"
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

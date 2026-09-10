@@ -1,0 +1,21 @@
+# Locally built helpers
+/hid-feature
+/km-g6ctl
+/km-g6-keys
+/km-g6-frame
+/test-keymask
+
+# Private stock-firmware backups (may contain device-specific data)
+/hardware/backups/*
+!/hardware/backups/README.md
+
+# Generated replacement-firmware artifacts
+/firmware/build/
+
+# Raw USB/HID captures and temporary capture sessions
+/captures/
+
+# Editor and OS files
+*~
+*.swp
+.DS_Store
