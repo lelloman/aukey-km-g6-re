@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 image="$repo_root/firmware/build/aukey-km-g6_default_smk.hex"
-expected_image_sha=90291d167332047ab114be5a467f48cdad6f1b6d72ee59a4ae9a76929be0915b
+expected_image_sha=c9045ecd9cfe89b82af7ab8de0d65093fbde466ae243ca00c5332584e3cd0a6b
 stock="$repo_root/hardware/backups/km-g6-stock-firmware-isp.bin"
 expected_stock_sha=d34032c10e8d483ac690079efc626266f2a561917bd15008f3b0402c49653f2a
 sinowisp_bin=${SINOWISP_BIN:-/tmp/km-g6-sinowisp/target/release/sinowisp}

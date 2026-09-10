@@ -283,7 +283,7 @@ index 0000000..8aeecf0
 +
 +void indicators_pre_update()
 +{
-+    GPIO_LOW(6, LED_ALL_ROWS);
++    GPIO_HIGH(6, LED_ALL_ROWS);
 +
 +    indicators_pwm_disable();
 +}
@@ -294,7 +294,7 @@ index 0000000..8aeecf0
 +
 +    LED_CAPS = !(keyboard->led_state & (1 << 1));
 +
-+    if (user_settings.led_effect >= FX_OFF) {
++    if (!host_lighting_is_active() && user_settings.led_effect >= FX_OFF) {
 +        return false;
 +    }
 +
@@ -313,6 +313,13 @@ index 0000000..8aeecf0
 +void indicators_post_update()
 +{
 +    PWM00CON &= ~(1 << 5);
++
++    /* Host mode deliberately uses direct GPIO first.  This provides a
++     * hardware-diagnostic path independent of the still-unverified PWM
++     * routing on the KM-G6. */
++    if (host_lighting_is_active()) {
++        return;
++    }
 +
 +    indicators_pwm_enable();
 +}
@@ -337,22 +344,22 @@ index 0000000..8aeecf0
 +{
 +    switch (led_row) {
 +        case 0:
-+            LED_R0 = 1;
++            LED_R0 = 0;
 +            break;
 +        case 1:
-+            LED_R1 = 1;
++            LED_R1 = 0;
 +            break;
 +        case 2:
-+            LED_R2 = 1;
++            LED_R2 = 0;
 +            break;
 +        case 3:
-+            LED_R3 = 1;
++            LED_R3 = 0;
 +            break;
 +        case 4:
-+            LED_R4 = 1;
++            LED_R4 = 0;
 +            break;
 +        case 5:
-+            LED_R5 = 1;
++            LED_R5 = 0;
 +            break;
 +    }
 +}
@@ -362,27 +369,27 @@ index 0000000..8aeecf0
 +    __xdata uint8_t *fb = led_fb[led_row];
 +
 +    if (host_lighting_is_active()) {
-+        SET_PWM_DUTY_2(LED_PWM_C0, LED_DUTY(host_lighting_get(led_row, 0)));
-+        SET_PWM_DUTY_2(LED_PWM_C1, LED_DUTY(host_lighting_get(led_row, 1)));
-+        SET_PWM_DUTY_2(LED_PWM_C2, LED_DUTY(host_lighting_get(led_row, 2)));
-+        SET_PWM_DUTY_2(LED_PWM_C3, LED_DUTY(host_lighting_get(led_row, 3)));
-+        SET_PWM_DUTY_2(LED_PWM_C4, LED_DUTY(host_lighting_get(led_row, 4)));
-+        SET_PWM_DUTY_2(LED_PWM_C5, LED_DUTY(host_lighting_get(led_row, 5)));
-+        SET_PWM_DUTY_2(LED_PWM_C6, LED_DUTY(host_lighting_get(led_row, 6)));
-+        SET_PWM_DUTY_2(LED_PWM_C7, LED_DUTY(host_lighting_get(led_row, 7)));
-+        SET_PWM_DUTY_2(LED_PWM_C8, LED_DUTY(host_lighting_get(led_row, 8)));
-+        SET_PWM_DUTY_2(LED_PWM_C9, LED_DUTY(host_lighting_get(led_row, 9)));
-+        SET_PWM_DUTY_2(LED_PWM_C10, LED_DUTY(host_lighting_get(led_row, 10)));
-+        SET_PWM_DUTY_2(LED_PWM_C11, LED_DUTY(host_lighting_get(led_row, 11)));
-+        SET_PWM_DUTY_2(LED_PWM_C12, LED_DUTY(host_lighting_get(led_row, 12)));
-+        SET_PWM_DUTY_2(LED_PWM_C13, LED_DUTY(host_lighting_get(led_row, 13)));
-+        SET_PWM_DUTY_2(LED_PWM_C14, LED_DUTY(host_lighting_get(led_row, 14)));
-+        SET_PWM_DUTY_2(LED_PWM_C15, LED_DUTY(host_lighting_get(led_row, 15)));
-+        SET_PWM_DUTY_2(LED_PWM_C16, LED_DUTY(host_lighting_get(led_row, 16)));
-+        SET_PWM_DUTY_2(LED_PWM_C17, LED_DUTY(host_lighting_get(led_row, 17)));
-+        SET_PWM_DUTY_2(LED_PWM_C18, LED_DUTY(host_lighting_get(led_row, 18)));
-+        SET_PWM_DUTY_2(LED_PWM_C19, LED_DUTY(host_lighting_get(led_row, 19)));
-+        SET_PWM_DUTY_2(LED_PWM_C20, LED_DUTY(host_lighting_get(led_row, 20)));
++        KB_C0  = host_lighting_get(led_row, 0)  ? 1 : 0;
++        KB_C1  = host_lighting_get(led_row, 1)  ? 1 : 0;
++        KB_C2  = host_lighting_get(led_row, 2)  ? 1 : 0;
++        KB_C3  = host_lighting_get(led_row, 3)  ? 1 : 0;
++        KB_C4  = host_lighting_get(led_row, 4)  ? 1 : 0;
++        KB_C5  = host_lighting_get(led_row, 5)  ? 1 : 0;
++        KB_C6  = host_lighting_get(led_row, 6)  ? 1 : 0;
++        KB_C7  = host_lighting_get(led_row, 7)  ? 1 : 0;
++        KB_C8  = host_lighting_get(led_row, 8)  ? 1 : 0;
++        KB_C9  = host_lighting_get(led_row, 9)  ? 1 : 0;
++        KB_C10 = host_lighting_get(led_row, 10) ? 1 : 0;
++        KB_C11 = host_lighting_get(led_row, 11) ? 1 : 0;
++        KB_C12 = host_lighting_get(led_row, 12) ? 1 : 0;
++        KB_C13 = host_lighting_get(led_row, 13) ? 1 : 0;
++        KB_C14 = host_lighting_get(led_row, 14) ? 1 : 0;
++        KB_C15 = host_lighting_get(led_row, 15) ? 1 : 0;
++        KB_C16 = host_lighting_get(led_row, 16) ? 1 : 0;
++        KB_C17 = host_lighting_get(led_row, 17) ? 1 : 0;
++        KB_C18 = host_lighting_get(led_row, 18) ? 1 : 0;
++        KB_C19 = host_lighting_get(led_row, 19) ? 1 : 0;
++        KB_C20 = host_lighting_get(led_row, 20) ? 1 : 0;
 +        return;
 +    }
 +
@@ -564,7 +571,7 @@ index 0000000..1cfe289
 +    GPIO_WRITE(2, (uint8_t)(KB_C2_P2_0 | KB_C3_P2_1 | KB_C4_P2_2 | KB_C5_P2_3 | KB_C6_P2_4 | KB_C7_P2_5));
 +    GPIO_WRITE(3, (uint8_t)(KB_C8_P3_0 | KB_C9_P3_1 | KB_C10_P3_2 | KB_C11_P3_3 | KB_C12_P3_4 | KB_C13_P3_5));
 +    GPIO_WRITE(5, (uint8_t)(KB_C18_P5_0 | KB_C19_P5_1 | KB_C20_P5_2));
-+    GPIO_WRITE(6, 0);
++    GPIO_WRITE(6, LED_R0_P6_0 | LED_R1_P6_1 | LED_R2_P6_2 | LED_R3_P6_3 | LED_R4_P6_4 | LED_R5_P6_5);
 +}
 +
 +void user_pwm_init()

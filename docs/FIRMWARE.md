@@ -48,9 +48,9 @@ matrix**: `6 * 21 = 126`, with unused positions in the full-size layout.
 
 The timer/PWM interrupt at `0x5DE6` calls the LED-row routine at `0x5258`.
 That routine treats the framebuffer as six consecutive groups of 21 bytes and
-selects P6.0-P6.5 for groups 0-5. Initial replacement-firmware testing showed
-that the row enables are active high; the earlier active-low interpretation
-left all six rows permanently illuminated.
+selects P6.0-P6.5, active low, for groups 0-5. A replacement-firmware test
+with the polarity inverted held every LED on, confirming the original
+active-low interpretation.
 
 The key scanner at `0x7129` advances one column per interrupt through all 21
 columns. It selects a column through the jump table at `0x305A`, samples six

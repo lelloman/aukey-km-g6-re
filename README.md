@@ -1,95 +1,136 @@
-# AUKEY KM-G6 control project
+# AUKEY KM-G6 reverse engineering
 
-Reverse engineering and, eventually, replacement firmware for persistent
-per-key lighting control on the AUKEY KM-G6 (`258a:002a`).
+Open research, Linux control tools, and experimental replacement firmware for
+the AUKEY KM-G6 mechanical keyboard.
 
-## Current status
+The goal is persistent, software-controlled per-key lighting without breaking
+normal keyboard input. The stock firmware exposes useful HID controls, but its
+per-key report is only a transient effect. This project documents that protocol,
+maps the keyboard hardware, and adds a native 126-key framebuffer to an
+experimental [SMK](https://github.com/carlossless/smk) firmware target.
 
-The keyboard's normal HID interface can control the global lighting mode,
-brightness, and speed. It also accepts a per-key mask, but the stock firmware
-renders that mask only as a transient flash. Repeated writes produce visible
-flicker rather than stable illumination.
+> [!CAUTION]
+> The replacement firmware compiles, but has not completed safe hardware
+> validation. Flashing it can brick the keyboard. Read the
+> [firmware notes](firmware/README.md) and establish a physical recovery path
+> before writing anything.
 
-**Persistent software-controlled keys are not available through the protocol
-we have found.** Replacement firmware appears practical, but recovery must be
-established before entering ISP or writing the controller.
+## Status
 
-The controller is marked `BYK901` (`NLA25`, `1918`) in an LQFP64 package, which
-identifies the Sino Wealth SH68F90A family. The PCB is marked
-`KM-G6 UK B2 V1.1`, dated `20180529`. Two full USB-ISP reads have produced
-byte-identical 64 KiB stock backups, including a recognized 4 KiB bootloader.
-Do not attempt a firmware write until the backup has been copied off-machine
-and the proposed image has been reviewed.
+| Area | State |
+| --- | --- |
+| Stock HID lighting controls | Working |
+| Stock key-map discovery | Working |
+| Persistent per-key lighting on stock firmware | Not available |
+| Matrix and LED GPIO mapping | Recovered from stock code |
+| Replacement SMK target | Builds successfully; experimental |
+| Host-controlled 6x21 intensity framebuffer | Implemented; hardware validation pending |
+| Verified stock backup | Captured and checked locally; intentionally not published |
+| Physical recovery | Not yet proven |
 
-## Project map
+The work targets the tested **AUKEY KM-G6 UK B2 V1.1** board, dated
+`20180529`, with USB ID `258a:002a` and device revision `10.36`. Its controller
+is marked `BYK901` (`NLA25`, `1918`) and belongs to the Sino Wealth SH68F90A
+family. The USB ID is shared by other keyboards, so it is not sufficient to
+identify compatible hardware.
 
-```text
-km-g6-control/
-├── README.md                 project overview and safe commands
-├── Makefile                  builds the Linux HID research tools
-├── km-g6                     experimental command-line wrapper
-├── *.c / *.sh                protocol probes retained from experiments
-├── captures/                 raw HID captures
-├── docs/
-│   ├── TEARDOWN.md           opening, cleaning, and photo checklist
-│   ├── PROTOCOL.md           verified HID findings
-│   ├── RESEARCH.md           controller evidence and references
-│   ├── FIRMWARE.md           offline stock-firmware analysis
-│   └── ROADMAP.md            route to persistent control
-└── hardware/
-    └── photos/               place teardown photographs here
-```
+## What works with stock firmware
 
-## What is safe to use now
-
-Build the helpers:
+On Linux, build the small HID helpers with:
 
 ```sh
 make
 ```
 
-Read the current global lighting state without writing:
+Read-only inspection:
 
 ```sh
 ./read-lighting.sh
-```
-
-Read the known feature reports without writing:
-
-```sh
 ./probe-reports.sh
 ```
 
-Global lighting commands are writable but recoverable with `Fn+PgUp` or by
-unplugging the keyboard:
+Global lighting controls are writable and recoverable by unplugging the
+keyboard or pressing `Fn+PgUp`:
 
 ```sh
 ./km-g6 brightness 0   # off
 ./km-g6 brightness 4   # maximum
-./km-g6 effect 1       # raw stock-firmware mode number
+./km-g6 effect 1       # stock-firmware effect number
 ```
 
-The `keys`, `hold`, `test-*`, `capture-*`, and calibration programs are
-research tools. They do **not** provide persistent per-key lighting and may
-temporarily leave the stock lighting in a confusing state.
+The `keys`, `hold`, `test-*`, `capture-*`, and calibration commands are
+research tools. They can leave the lighting in a confusing state temporarily,
+and they do not provide stable per-key lighting on the stock firmware.
 
-## Next session
+## Experimental replacement firmware
 
-When there is time to remove and clean the keycaps, follow
-[`docs/TEARDOWN.md`](docs/TEARDOWN.md). We need clear photographs of the full
-PCB, controller marking, board revision, LED-driver components, and USB area.
-No desoldering is required for this inspection.
+The firmware patch is pinned to a known SMK revision and can be built inside a
+Debian Trixie container:
 
-After identifying the hardware, continue with [`docs/ROADMAP.md`](docs/ROADMAP.md).
+```sh
+firmware/build-smk.sh
+firmware/check-readiness.sh
+```
 
-## Hard safety boundary
+Building and checking are offline operations with respect to the keyboard;
+they do not enter ISP mode or write the device.
 
-There are deliberately no firmware-dumping or flashing scripts in this
-project yet. On compatible Sino Wealth controllers, even a nominal firmware
-"read" can modify the flash enable/jump bytes using an assumed firmware size.
-A wrong assumption can prevent the keyboard from booting. We first need:
+The replacement firmware implements HID feature report `0x08`, carrying a
+versioned 6x21 monochrome framebuffer. Once compatible firmware is installed,
+the host utility is designed to use it like this:
 
-1. A confirmed MCU marking and PCB revision.
-2. A verified flash geometry and ISP method.
-3. A stock-firmware backup strategy.
-4. A physical recovery programmer or a consciously accepted no-recovery risk.
+```sh
+sudo ./km-g6-frame /dev/hidrawN info
+sudo ./km-g6-frame /dev/hidrawN set ROW COL INTENSITY
+sudo ./km-g6-frame /dev/hidrawN fill INTENSITY
+sudo ./km-g6-frame /dev/hidrawN clear
+sudo ./km-g6-frame /dev/hidrawN off
+```
+
+Each key has a fixed-color LED. Software can control whether a key is lit and
+its intensity, but cannot change its physical color.
+
+## Repository guide
+
+| Path | Contents |
+| --- | --- |
+| [`docs/PROTOCOL.md`](docs/PROTOCOL.md) | Verified stock HID reports and the replacement host protocol |
+| [`docs/FIRMWARE.md`](docs/FIRMWARE.md) | Offline analysis of the stock firmware |
+| [`docs/RESEARCH.md`](docs/RESEARCH.md) | Controller identification, evidence, and references |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Work completed and the path to persistent notifications |
+| [`docs/TEARDOWN.md`](docs/TEARDOWN.md) | Safe disassembly and hardware-inspection checklist |
+| [`firmware/`](firmware/) | SMK target patch, reproducible build, and guarded write tooling |
+| [`hardware/`](hardware/) | PCB observations and private-backup documentation |
+| `*.c`, `*.sh`, `km-g6` | Linux HID utilities and retained protocol experiments |
+
+Stock firmware images, generated builds, raw captures, and compiled binaries
+are excluded from the repository. Backup hashes are documented so local copies
+can be verified without redistributing the vendor firmware.
+
+## Safety model
+
+Even an apparent firmware “read” on supported Sino Wealth controllers may
+modify flash metadata based on the selected geometry. A wrong target or an
+unbootable application can make USB recovery impossible.
+
+Before the first experimental flash:
+
+1. Keep verified stock backups on another machine or disk.
+2. Identify and test the physical programming connection.
+3. Confirm voltage levels, pinout, flash geometry, and the exact board revision.
+4. Review the generated image and accept that the keyboard may still become
+   unrecoverable.
+
+The write scripts deliberately require explicit acknowledgement flags and
+pinned image hashes. Those checks reduce accidental misuse; they do not make
+an unverified flash safe.
+
+## Contributing
+
+Hardware photographs, continuity measurements, protocol captures, firmware
+review, and testing on precisely identified KM-G6 revisions are welcome. When
+reporting results, include the PCB revision, controller marking, USB device
+revision, and the exact command or firmware hash used.
+
+Start with the [roadmap](docs/ROADMAP.md) and keep destructive experiments
+separate from observations confirmed on stock firmware.

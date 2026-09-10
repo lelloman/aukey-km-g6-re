@@ -13,8 +13,8 @@ Run `firmware/build-smk.sh` to clone the pinned SMK revision, apply the target
 patch, and compile it in a Debian Trixie container with SDCC 4.5. The script
 does not access or write the keyboard.
 
-The active-high LED-row correction produces SHA-256
-`90291d167332047ab114be5a467f48cdad6f1b6d72ee59a4ae9a76929be0915b`.
+The active-low LED-row correction produces SHA-256
+`c9045ecd9cfe89b82af7ab8de0d65093fbde466ae243ca00c5332584e3cd0a6b`.
 SMK's interrupt checker reported all 14 vectors claimed and no ISR overlay
 collisions.
 
