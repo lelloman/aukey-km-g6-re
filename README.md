@@ -94,6 +94,10 @@ For passwordless, restricted lighting control, install the root-owned
 [lighting helper](docs/LIGHTING-HELPER.md). The mapping GUI uses that helper
 instead of running as root.
 
+For integration from scripts or applications, see the
+[local control API](docs/CONTROL-API.md), including command semantics,
+service coordination, and a proposed future notification interface.
+
 Run `./keyboard_program.py base` for CPU utilization on F1–F4 and low disk
 space warnings on F5–F8, plus RAM warnings on F9–F12. See [keyboard programs](docs/KEYBOARD-PROGRAMS.md)
 for configurable thresholds and hardware-free previews.

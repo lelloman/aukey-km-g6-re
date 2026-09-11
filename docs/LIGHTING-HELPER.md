@@ -35,6 +35,9 @@ No system installation is performed by `make`.
 
 ## Commands
 
+See [the control API guide](CONTROL-API.md) for the full command contract,
+application examples, and coordination with the running base service.
+
 ```sh
 sudo -n /usr/local/sbin/km-g6-lighting info
 sudo -n /usr/local/sbin/km-g6-lighting set 4 5 255
