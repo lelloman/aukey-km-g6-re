@@ -1,0 +1,21 @@
+[Unit]
+Description=KM-G6 CPU and disk warning lights
+# Keep retrying if the keyboard is unplugged or the helper is not ready.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.local/share/km-g6-control/keyboard_program.py base --quiet
+Restart=on-failure
+RestartSec=10
+# Signal Python first so it can call the helper to clear LEDs before exiting.
+KillMode=mixed
+TimeoutStopSec=10
+Environment=PYTHONUNBUFFERED=1
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+UMask=0077
+# Do not set NoNewPrivileges or PrivateDevices: the restricted sudo helper
+# needs to elevate and access the physical keyboard. Python stays unprivileged.
+
+[Install]
+WantedBy=default.target

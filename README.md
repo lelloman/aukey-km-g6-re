@@ -94,6 +94,10 @@ For passwordless, restricted lighting control, install the root-owned
 [lighting helper](docs/LIGHTING-HELPER.md). The mapping GUI uses that helper
 instead of running as root.
 
+Run `./keyboard_program.py base` for CPU utilization on F1–F4 and low disk
+space warnings on F5–F8. See [keyboard programs](docs/KEYBOARD-PROGRAMS.md)
+for configurable thresholds and hardware-free previews.
+
 Visually calibrate the lighting matrix against the physical Italian ISO
 layout with:
 
