@@ -95,7 +95,7 @@ For passwordless, restricted lighting control, install the root-owned
 instead of running as root.
 
 Run `./keyboard_program.py base` for CPU utilization on F1–F4 and low disk
-space warnings on F5–F8. See [keyboard programs](docs/KEYBOARD-PROGRAMS.md)
+space warnings on F5–F8, plus RAM warnings on F9–F12. See [keyboard programs](docs/KEYBOARD-PROGRAMS.md)
 for configurable thresholds and hardware-free previews.
 
 Visually calibrate the lighting matrix against the physical Italian ISO

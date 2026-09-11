@@ -14,6 +14,10 @@ HELPER = Path("/usr/local/sbin/km-g6-lighting")
 # Physical slots confirmed in lighting-map.json, not USB keycodes.
 CPU_KEYS = ((0, 2), (0, 3), (0, 4), (0, 5))  # F1–F4
 DISK_KEYS = ((0, 6), (0, 7), (0, 8), (0, 9))  # F5–F8
+RAM_KEYS = ((0, 10), (0, 11), (0, 12), (0, 13))  # F9–F12
+ALL_KEYS = CPU_KEYS + DISK_KEYS + RAM_KEYS
+RAM_LEVELS = (60, 75, 85, 95)
+RAM_FLASH_ABOVE = 98
 THRESHOLDS = (20, 40, 60, 80)
 DISK_LEVELS = (50, 40, 30, 20)
 FLASH_SECONDS = 0.5
@@ -47,12 +51,34 @@ def free_gb(path):
     return max(0.0, stats.f_bavail * stats.f_frsize / 1_000_000_000)
 
 
+def ram_percent(text):
+    values = {}
+    for line in text.splitlines():
+        fields = line.split()
+        if fields and fields[0] in ("MemTotal:", "MemAvailable:"):
+            if len(fields) != 3 or fields[2] != "kB":
+                raise ValueError("Invalid memory counters in /proc/meminfo")
+            values[fields[0]] = int(fields[1])
+    total = values.get("MemTotal:", 0)
+    available = values.get("MemAvailable:", -1)
+    if total <= 0 or available < 0 or available > total:
+        raise ValueError("Missing or invalid MemTotal/MemAvailable in /proc/meminfo")
+    return 100.0 * (total - available) / total
+
+
+def read_ram():
+    return ram_percent(Path("/proc/meminfo").read_text())
+
+
 def base_frame(cpu, disk_free, brightness, disk_levels=DISK_LEVELS,
-               flash_below=10, flash_on=True):
+               flash_below=10, flash_on=True, *, ram=0):
     frame = {key: brightness if cpu > threshold else 0
              for key, threshold in zip(CPU_KEYS, THRESHOLDS)}
     for key, threshold in zip(DISK_KEYS, disk_levels):
         lit = flash_on if disk_free < flash_below else disk_free <= threshold
+        frame[key] = brightness if lit else 0
+    for key, threshold in zip(RAM_KEYS, RAM_LEVELS):
+        lit = flash_on if ram > RAM_FLASH_ABOVE else ram > threshold
         frame[key] = brightness if lit else 0
     return frame
 
@@ -71,7 +97,7 @@ class Lighting:
     def start(self):
         self.command("info")
         self.command("clear")
-        self.previous = {key: 0 for key in CPU_KEYS + DISK_KEYS}
+        self.previous = {key: 0 for key in ALL_KEYS}
 
     def render(self, frame):
         # Do not clear between samples: unchanged LEDs stay steady.
@@ -89,7 +115,7 @@ class Lighting:
         status = self.command("info")
         if "active=0" in status.split():
             self.command("clear")
-            self.previous = {key: 0 for key in CPU_KEYS + DISK_KEYS}
+            self.previous = {key: 0 for key in ALL_KEYS}
 
 
 def positive_interval(text):
@@ -113,10 +139,76 @@ def nonnegative_gb(text):
     return value
 
 
+def preview_disk_alarm(seconds=10, brightness=255):
+    """Temporarily pause the user service and always attempt to restore it."""
+    def service(*args):
+        return subprocess.run(["systemctl", "--user", *args], capture_output=True,
+                              text=True, timeout=15, check=True)
+
+    restart = False
+    lighting = None
+    lock = None
+    old_term = signal.getsignal(signal.SIGTERM)
+
+    def interrupted(signum, frame):
+        raise KeyboardInterrupt
+
+    try:
+        signal.signal(signal.SIGTERM, interrupted)
+        state = service("show", "km-g6-base.service", "--property=ActiveState", "--value").stdout.strip()
+        restart = state in ("active", "activating", "reloading")
+        if restart:
+            service("stop", "km-g6-base.service")
+        cache = Path.home() / ".cache" / "km-g6-control"
+        cache.mkdir(parents=True, exist_ok=True)
+        lock = (cache / "program.lock").open("a")
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError("Stop the manually running keyboard program before previewing") from None
+        lighting = Lighting()
+        lighting.start()
+        print(f"Preview: F5–F8 flashing for {seconds:g} seconds. No disk space is consumed.", flush=True)
+        start = time.monotonic()
+        end = start + seconds
+        while time.monotonic() < end:
+            now = time.monotonic()
+            phase = int((now - start) / FLASH_SECONDS)
+            lighting.render(base_frame(0, 0, brightness, flash_on=phase % 2 == 0))
+            wake = min(end, start + (phase + 1) * FLASH_SECONDS)
+            time.sleep(max(0, wake - time.monotonic()))
+        return 0
+    except KeyboardInterrupt:
+        return 0
+    except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+        print(f"Preview failed: {error}", file=sys.stderr)
+        return 1
+    finally:
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        try:
+            if lighting:
+                lighting.stop()
+        except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+            print(f"Could not clear preview: {error}", file=sys.stderr)
+        finally:
+            if lock:
+                lock.close()
+            if restart:
+                try:
+                    service("start", "km-g6-base.service")
+                    print("Live monitoring restarted.", flush=True)
+                except (OSError, subprocess.SubprocessError) as error:
+                    print(f"Could not restart monitoring: {error}; run systemctl --user start km-g6-base", file=sys.stderr)
+            signal.signal(signal.SIGTERM, old_term)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     programs = parser.add_subparsers(dest="program", required=True)
-    base = programs.add_parser("base", help="CPU on F1–F4, low disk space warnings on F5–F8")
+    preview = programs.add_parser("preview-disk-alarm", help="flash F5–F8 briefly, then restore the service")
+    preview.add_argument("--seconds", type=positive_interval, default=10.0)
+    preview.add_argument("--brightness", type=brightness_value, default=255)
+    base = programs.add_parser("base", help="CPU F1–F4, disk warnings F5–F8, RAM F9–F12")
     base.add_argument("--disk-path", type=Path, default=Path("/"),
                       help="path on the filesystem to monitor (default: /)")
     base.add_argument("--disk-levels", type=nonnegative_gb, nargs=4, default=DISK_LEVELS,
@@ -132,6 +224,10 @@ def main(argv=None):
     base.add_argument("--once", action="store_true", help="sample once, then exit (clears LEDs on exit)")
     base.add_argument("--quiet", action="store_true", help="omit per-sample output (for services)")
     args = parser.parse_args(argv)
+    if args.program == "preview-disk-alarm":
+        if args.seconds > 30:
+            parser.error("preview must be at most 30 seconds")
+        return preview_disk_alarm(args.seconds, args.brightness)
     if any(a <= b for a, b in zip(args.disk_levels, args.disk_levels[1:])):
         parser.error("--disk-levels must be strictly descending")
     if args.disk_flash_below > args.disk_levels[-1]:
@@ -145,6 +241,7 @@ def main(argv=None):
 
     try:
         disk = free_gb(args.disk_path)  # Fail before changing any LEDs.
+        ram = read_ram()
         disk_deadline = time.monotonic() + args.disk_interval
         if not args.dry_run:
             if not HELPER.is_file():
@@ -161,7 +258,8 @@ def main(argv=None):
         if lighting:
             lighting.start()
         print(f"Base: CPU F1–F4 >20/40/60/80%; disk {args.disk_path} "
-              f"F5–F8 ≤{list(args.disk_levels)} GB, flashing below {args.disk_flash_below:g} GB.", flush=True)
+              f"F5–F8 ≤{list(args.disk_levels)} GB, flashing below {args.disk_flash_below:g} GB; "
+              "RAM F9–F12 >60/75/85/95%, flashing above 98%.", flush=True)
         print("Ctrl-C stops and clears the backlight." if lighting else "Preview only: no device access.", flush=True)
         previous = read_cpu()
         deadline = time.monotonic() + args.interval
@@ -176,6 +274,7 @@ def main(argv=None):
                 current = read_cpu()
                 cpu = cpu_percent(previous, current)
                 previous = current
+                ram = read_ram()
                 deadline = now + args.interval
             disk_due = now >= disk_deadline
             if disk_due:
@@ -183,15 +282,18 @@ def main(argv=None):
                 disk_deadline = now + args.disk_interval
                 if lighting:
                     lighting.refresh()
-            flashing = disk < args.disk_flash_below
+            disk_flashing = disk < args.disk_flash_below
+            ram_flashing = ram > RAM_FLASH_ABOVE
+            flashing = disk_flashing or ram_flashing
             frame = base_frame(cpu, disk, args.brightness, args.disk_levels,
-                               args.disk_flash_below, int(now / FLASH_SECONDS) % 2 == 0)
+                               args.disk_flash_below, int(now / FLASH_SECONDS) % 2 == 0, ram=ram)
             if lighting:
                 lighting.render(frame)
-            lit = [f"F{i + 1}" for i, key in enumerate(CPU_KEYS + DISK_KEYS) if frame[key]]
+            lit = [f"F{i + 1}" for i, key in enumerate(ALL_KEYS) if frame[key]]
             if (sample_due or disk_due) and not args.quiet:
                 print(f"CPU {cpu:5.1f}% | disk free {disk:6.2f} GB "
-                      f"{'[FLASHING]' if flashing else ''} | lit: {', '.join(lit) or 'none'}", flush=True)
+                      f"{'[FLASHING]' if disk_flashing else ''} | RAM {ram:5.1f}% "
+                      f"{'[FLASHING]' if ram_flashing else ''} | lit: {', '.join(lit) or 'none'}", flush=True)
             if args.once and sample_due:
                 break
             wake = min(deadline, disk_deadline)

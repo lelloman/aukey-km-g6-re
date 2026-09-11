@@ -1,4 +1,6 @@
 import unittest
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -6,6 +8,62 @@ import keyboard_program as program
 
 
 class BaseProgramTests(unittest.TestCase):
+    def test_preview_restores_service_after_success_or_failure(self):
+        for fail in (False, True):
+            with self.subTest(fail=fail), tempfile.TemporaryDirectory() as directory:
+                clock = [0.0]
+                light = Mock()
+                if fail:
+                    light.render.side_effect = RuntimeError("disconnected")
+                def sleep(seconds):
+                    clock[0] += seconds
+                with patch.object(program.Path, "home", return_value=Path(directory)), \
+                     patch.object(program, "Lighting", return_value=light), \
+                     patch.object(program.subprocess, "run", return_value=SimpleNamespace(stdout="active\n")) as service, \
+                     patch.object(program.time, "monotonic", side_effect=lambda: clock[0]), \
+                     patch.object(program.time, "sleep", side_effect=sleep):
+                    self.assertEqual(program.preview_disk_alarm(1), 1 if fail else 0)
+                    light.stop.assert_called_once()
+                    self.assertEqual(service.call_args_list[1].args[0][-2:], ["stop", "km-g6-base.service"])
+                    self.assertEqual(service.call_args_list[-1].args[0][-2:], ["start", "km-g6-base.service"])
+                    if not fail:
+                        frames = [call.args[0] for call in light.render.call_args_list]
+                        self.assertEqual([frames[0][key] for key in program.DISK_KEYS], [255] * 4)
+                        self.assertEqual([frames[1][key] for key in program.DISK_KEYS], [0] * 4)
+
+    def setUp(self):
+        ram = patch.object(program, "read_ram", return_value=30)
+        ram.start()
+        self.addCleanup(ram.stop)
+
+    def test_ram_uses_available_not_free_memory(self):
+        self.assertEqual(program.ram_percent(
+            "MemTotal: 1000 kB\nMemFree: 10 kB\nMemAvailable: 700 kB\nCached: 600 kB"), 30)
+
+    def test_ram_rejects_invalid_or_missing_counters(self):
+        for text in ("", "MemTotal: 100 kB", "MemTotal: 0 kB\nMemAvailable: 0 kB",
+                     "MemTotal: 100 kB\nMemAvailable: 101 kB",
+                     "MemTotal: 100 kB\nMemAvailable: -1 kB"):
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                program.ram_percent(text)
+
+    def test_ram_thresholds_strict_and_cumulative(self):
+        for percent, count in ((0, 0), (60, 0), (60.01, 1), (75, 1), (75.01, 2),
+                               (85, 2), (85.01, 3), (95, 3), (95.01, 4), (98, 4)):
+            frame = program.base_frame(0, 100, 128, ram=percent, flash_on=False)
+            self.assertEqual([frame[key] for key in program.RAM_KEYS],
+                             [128] * count + [0] * (4 - count))
+
+    def test_ram_flashes_independently_of_disk_and_cpu(self):
+        for phase in (False, True):
+            frame = program.base_frame(65, 30, 255, ram=98.01, flash_on=phase)
+            self.assertEqual([frame[key] for key in program.RAM_KEYS], [255 if phase else 0] * 4)
+            self.assertEqual([frame[key] for key in program.CPU_KEYS], [255, 255, 255, 0])
+            self.assertEqual([frame[key] for key in program.DISK_KEYS], [255, 255, 255, 0])
+            both = program.base_frame(65, 9, 255, ram=100, flash_on=phase)
+            self.assertEqual([both[key] for key in program.DISK_KEYS + program.RAM_KEYS],
+                             [255 if phase else 0] * 8)
+
     def test_cpu_thresholds_are_strict_and_cumulative(self):
         for percent, count in ((0, 0), (20, 0), (20.01, 1), (40, 1),
                                (40.01, 2), (60, 2), (60.01, 3),
@@ -117,6 +175,27 @@ class BaseProgramTests(unittest.TestCase):
              patch.object(program, "base_frame", wraps=program.base_frame) as render:
             self.assertEqual(program.main(["base", "--dry-run", "--interval", "2"]), 0)
             self.assertEqual(cpu.call_count, 2)
+            self.assertEqual([call.args[-1] for call in render.call_args_list], [True, False, True])
+            self.assertEqual(sleeps, [2, 0.5, 0.5, 0.5])
+
+    def test_ram_alone_enables_flash_timer(self):
+        clock = [0.0]
+        sleeps = []
+
+        def sleep(seconds):
+            sleeps.append(seconds)
+            if len(sleeps) == 4:
+                raise KeyboardInterrupt
+            clock[0] += seconds
+
+        with patch.object(program, "read_cpu", return_value=(100, 40)), \
+             patch.object(program, "read_ram", return_value=99) as ram, \
+             patch.object(program, "free_gb", return_value=100), \
+             patch.object(program.time, "monotonic", side_effect=lambda: clock[0]), \
+             patch.object(program.time, "sleep", side_effect=sleep), \
+             patch.object(program, "base_frame", wraps=program.base_frame) as render:
+            self.assertEqual(program.main(["base", "--dry-run", "--interval", "2"]), 0)
+            self.assertEqual(ram.call_count, 2)  # Startup plus sample, not each flash.
             self.assertEqual([call.args[-1] for call in render.call_args_list], [True, False, True])
             self.assertEqual(sleeps, [2, 0.5, 0.5, 0.5])
 

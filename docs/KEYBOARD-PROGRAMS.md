@@ -20,6 +20,14 @@ The base program uses cumulative bars at maximum brightness:
 Below 10 GB, F5–F8 flash together, alternating on/off every half second;
 CPU indicators remain steady. At exactly 10 GB the disk warning stays solid.
 
+RAM warnings use F9–F12, cumulatively above 60%, 75%, 85%, and 95% used.
+Above 98%, all four flash together every half second (at exactly 98% they
+stay solid). RAM usage is `(MemTotal - MemAvailable) / MemTotal` from
+`/proc/meminfo`, so reclaimable cache is treated as available. This is a
+memory-capacity warning, not Linux PSI stall measurement. CPU and disk
+indicators are unaffected by RAM flashing; simultaneous critical disk and
+RAM warnings flash their respective groups together.
+
 At exactly a threshold the next key stays off: 40% CPU lights only F1.
 CPU means aggregate utilization over the sampling interval, not the Linux
 load average. Idle and I/O-wait time are excluded; guest time is not counted
@@ -27,7 +35,7 @@ twice. Disk means space available to ordinary users, excluding reserved
 blocks, on the filesystem containing `--disk-path` (default `/`). GB means
 1,000,000,000 bytes, not GiB. Less free space lights more warning keys.
 
-CPU is sampled once per second. Disk space is checked at startup, then every
+CPU and RAM are sampled once per second. Disk space is checked at startup, then every
 20 seconds (`--disk-interval 20`); its cached value drives warning flashing
 between checks. Startup clears the backlight; other keys stay
 dark. Updates touch only changed indicator keys, without clearing the whole
@@ -38,6 +46,9 @@ or forcibly killing the process can prevent cleanup.
 ```sh
 # Preview metrics without sudo or a keyboard:
 ./keyboard_program.py base --dry-run --once
+
+# Show the actual disk warning for ten seconds without filling the disk:
+./keyboard_program.py preview-disk-alarm
 
 # Monitor the root filesystem and use dimmer indicators:
 ./keyboard_program.py base --disk-path / --brightness 128 --interval 2
@@ -57,6 +68,11 @@ explanation.
 Warning levels must be strictly descending, nonnegative values. The flashing
 threshold must not exceed the F8 threshold. Changing the sampling interval
 does not change the half-second flashing cadence.
+
+`preview-disk-alarm` pauses the active base service, flashes F5–F8, clears
+the preview, then restarts the service. It also attempts restoration after
+Ctrl-C or an error. Stop a manually running base program before previewing.
+Use `--seconds 5` to change the preview duration (maximum 30 seconds).
 
 ## Run automatically with systemd
 

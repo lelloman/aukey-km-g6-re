@@ -1,5 +1,5 @@
 [Unit]
-Description=KM-G6 CPU and disk warning lights
+Description=KM-G6 CPU, disk and RAM warning lights
 # Keep retrying if the keyboard is unplugged or the helper is not ready.
 StartLimitIntervalSec=0
 
