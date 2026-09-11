@@ -3,7 +3,7 @@ CFLAGS ?= -O2 -Wall -Wextra -Wpedantic
 
 .PHONY: all clean
 
-all: hid-feature km-g6ctl km-g6-keys km-g6-frame test-keymask
+all: hid-feature km-g6ctl km-g6-keys km-g6-frame km-g6-lighting test-keymask
 
 hid-feature: hid-feature.c
 	$(CC) $(CFLAGS) -o $@ $<
@@ -17,8 +17,14 @@ km-g6-keys: km-g6-keys.c
 km-g6-frame: km-g6-frame.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+km-g6-lighting: km-g6-lighting.c km-g6-frame.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+test-lighting-helper: test-lighting-helper.c km-g6-lighting.c km-g6-frame.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 test-keymask: test-keymask.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	$(RM) hid-feature km-g6ctl km-g6-keys km-g6-frame test-keymask
+	$(RM) hid-feature km-g6ctl km-g6-keys km-g6-frame km-g6-lighting test-keymask test-lighting-helper

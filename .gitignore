@@ -3,7 +3,9 @@
 /km-g6ctl
 /km-g6-keys
 /km-g6-frame
+/km-g6-lighting
 /test-keymask
+/test-lighting-helper
 
 # Private stock-firmware backups (may contain device-specific data)
 /hardware/backups/*

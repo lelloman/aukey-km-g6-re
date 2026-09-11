@@ -23,7 +23,7 @@ static int number(const char *text, int max, const char *label)
 {
     char *end = NULL;
     long value = strtol(text, &end, 0);
-    if (!end || *end || value < 0 || value > max) {
+    if (end == text || *end || value < 0 || value > max) {
         fprintf(stderr, "%s must be between 0 and %d\n", label, max);
         return -1;
     }
@@ -61,19 +61,8 @@ static int set_active(int fd, int active)
     return send_report(fd, 3, 0, 0, (unsigned char)active, 0, 0);
 }
 
-int main(int argc, char **argv)
+static int run_command(int fd, int argc, char **argv)
 {
-    if (argc < 3) {
-        usage(argv[0]);
-        return 2;
-    }
-
-    int fd = open(argv[1], O_RDWR | O_CLOEXEC);
-    if (fd < 0) {
-        fprintf(stderr, "open %s: %s\n", argv[1], strerror(errno));
-        return 1;
-    }
-
     int result = 0;
     if (!strcmp(argv[2], "info") && argc == 3) {
         unsigned char report[REPORT_SIZE] = { REPORT_ID };
@@ -108,6 +97,23 @@ int main(int argc, char **argv)
         result = 2;
     }
 
+    return result;
+}
+
+#ifndef KM_G6_RESTRICTED_HELPER
+int main(int argc, char **argv)
+{
+    if (argc < 3) {
+        usage(argv[0]);
+        return 2;
+    }
+    int fd = open(argv[1], O_RDWR | O_CLOEXEC);
+    if (fd < 0) {
+        fprintf(stderr, "open %s: %s\n", argv[1], strerror(errno));
+        return 1;
+    }
+    int result = run_command(fd, argc, argv);
     close(fd);
     return result;
 }
+#endif

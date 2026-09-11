@@ -12,7 +12,7 @@ from tkinter import messagebox
 
 
 ROOT = pathlib.Path(__file__).resolve().parent
-FRAME = ROOT / "km-g6-frame"
+FRAME = pathlib.Path("/usr/local/sbin/km-g6-lighting")
 UNUSED_MODE = "--unused" in sys.argv[1:]
 OUTPUT = ROOT / ("lighting-map-unused.json" if UNUSED_MODE else "lighting-map.json")
 
@@ -224,7 +224,7 @@ class Mapper:
 
     def command(self, *args: str) -> None:
         completed = subprocess.run(
-            ["sudo", "-n", str(FRAME), self.device, *args],
+            ["sudo", "-n", str(FRAME), *args],
             text=True, capture_output=True,
         )
         if completed.returncode:
@@ -363,13 +363,12 @@ class Mapper:
 
 
 def main() -> int:
-    if subprocess.run(["sudo", "-v"]).returncode:
-        print("sudo authorization is required to access the keyboard", file=sys.stderr)
+    if not FRAME.is_file():
+        print("Install the lighting helper first; see docs/LIGHTING-HELPER.md", file=sys.stderr)
         return 1
-    subprocess.run(["make", "-s", "-C", str(ROOT), "km-g6-frame"], check=True)
     try:
         device = find_device()
-        subprocess.run(["sudo", "-n", str(FRAME), device, "info"], check=True)
+        subprocess.run(["sudo", str(FRAME), "info"], check=True)
     except (RuntimeError, subprocess.CalledProcessError) as error:
         print(error, file=sys.stderr)
         return 1

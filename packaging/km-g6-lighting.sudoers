@@ -1,0 +1,3 @@
+# Install the compiled helper root-owned at this exact path, never in the workspace.
+# Argument validation and device/protocol restrictions are enforced by the helper.
+YOUR_USERNAME ALL=(root) NOPASSWD: /usr/local/sbin/km-g6-lighting

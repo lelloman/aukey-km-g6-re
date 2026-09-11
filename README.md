@@ -90,6 +90,10 @@ sudo ./km-g6-frame /dev/hidrawN off
 Each key has a fixed-color LED. Software can control whether a key is lit and
 its intensity, but cannot change its physical color.
 
+For passwordless, restricted lighting control, install the root-owned
+[lighting helper](docs/LIGHTING-HELPER.md). The mapping GUI uses that helper
+instead of running as root.
+
 Visually calibrate the lighting matrix against the physical Italian ISO
 layout with:
 
