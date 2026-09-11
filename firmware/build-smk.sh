@@ -23,5 +23,5 @@ docker run --rm \
     debian:trixie-slim \
     bash -lc 'apt-get update >/dev/null && apt-get install -y --no-install-recommends meson ninja-build sdcc build-essential python3 >/dev/null && ln -s /usr/bin/true /usr/local/bin/sinowisp && meson setup build && ninja -C build aukey-km-g6_default_smk.hex && chown -R "$HOST_UID:$HOST_GID" /src/build'
 
-cp "$work_dir/smk/build/aukey-km-g6_default_smk.hex" "$repo_root/firmware/build/"
-echo "Built firmware/build/aukey-km-g6_default_smk.hex (compile-only; do not flash yet)."
+cp "$work_dir/smk/build/aukey-km-g6_default_smk.hex" "$repo_root/firmware/build/aukey-km-g6_stock-pwm-candidate.hex"
+echo "Built firmware/build/aukey-km-g6_stock-pwm-candidate.hex (compile-only; do not flash yet)."

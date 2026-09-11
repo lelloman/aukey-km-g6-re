@@ -90,6 +90,22 @@ sudo ./km-g6-frame /dev/hidrawN off
 Each key has a fixed-color LED. Software can control whether a key is lit and
 its intensity, but cannot change its physical color.
 
+Visually calibrate the lighting matrix against the physical Italian ISO
+layout with:
+
+```sh
+./map-lights-gui.py
+```
+
+The GUI lights one firmware slot at maximum intensity and records the physical
+key pressed, a clicked layout key, or `None lit` in `lighting-map.json`.
+Closing an incomplete mapping discards it, so the next launch starts from the
+first slot. A completed mapping is retained.
+
+After the normal pass, probe only the 20 matrix slots currently believed to
+be unused with `./map-lights-gui.py --unused`. Those observations are saved
+separately in `lighting-map-unused.json`.
+
 ## Repository guide
 
 | Path | Contents |

@@ -13,7 +13,7 @@ check_hash() {
     echo "$expected  $file" | sha256sum --check
 }
 
-check_hash c9045ecd9cfe89b82af7ab8de0d65093fbde466ae243ca00c5332584e3cd0a6b "$candidate"
+check_hash 3357372b13a94605b2717ce0ff391144434bd2bcc6feaf22a78fae3922c00fad "$candidate"
 check_hash d34032c10e8d483ac690079efc626266f2a561917bd15008f3b0402c49653f2a "$stock_app"
 check_hash cf2dcfe9b6830e254d031eaeefc8c6974d602a10b0a4c80b95f329ead7a258f5 "$stock_full_1"
 check_hash cf2dcfe9b6830e254d031eaeefc8c6974d602a10b0a4c80b95f329ead7a258f5 "$stock_full_2"

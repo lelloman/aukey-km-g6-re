@@ -1,0 +1,1063 @@
+{
+  "format": 1,
+  "complete": true,
+  "device": "/dev/hidraw4",
+  "mapped": 106,
+  "total": 106,
+  "slots": [
+    {
+      "row": 0,
+      "col": 1,
+      "expected": "ESC",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Esc",
+        "x_keycode": 9
+      }
+    },
+    {
+      "row": 0,
+      "col": 2,
+      "expected": "F1",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F1",
+        "x_keycode": 67
+      }
+    },
+    {
+      "row": 0,
+      "col": 3,
+      "expected": "F2",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F2",
+        "x_keycode": 68
+      }
+    },
+    {
+      "row": 0,
+      "col": 4,
+      "expected": "F3",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F3",
+        "x_keycode": 69
+      }
+    },
+    {
+      "row": 0,
+      "col": 5,
+      "expected": "F4",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F4",
+        "x_keycode": 70
+      }
+    },
+    {
+      "row": 0,
+      "col": 6,
+      "expected": "F5",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F5",
+        "x_keycode": 71
+      }
+    },
+    {
+      "row": 0,
+      "col": 7,
+      "expected": "F6",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F6",
+        "x_keycode": 72
+      }
+    },
+    {
+      "row": 0,
+      "col": 8,
+      "expected": "F7",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F7",
+        "x_keycode": 73
+      }
+    },
+    {
+      "row": 0,
+      "col": 9,
+      "expected": "F8",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F8",
+        "x_keycode": 74
+      }
+    },
+    {
+      "row": 0,
+      "col": 10,
+      "expected": "F9",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F9",
+        "x_keycode": 75
+      }
+    },
+    {
+      "row": 0,
+      "col": 11,
+      "expected": "F10",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F10",
+        "x_keycode": 76
+      }
+    },
+    {
+      "row": 0,
+      "col": 12,
+      "expected": "F11",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F11",
+        "x_keycode": 95
+      }
+    },
+    {
+      "row": 0,
+      "col": 13,
+      "expected": "F12",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F12",
+        "x_keycode": 96
+      }
+    },
+    {
+      "row": 0,
+      "col": 14,
+      "expected": "PRTSC",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Stamp",
+        "x_keycode": 107
+      }
+    },
+    {
+      "row": 0,
+      "col": 15,
+      "expected": "SCROLL",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Bloc Scorr",
+        "x_keycode": 78
+      }
+    },
+    {
+      "row": 0,
+      "col": 16,
+      "expected": "PAUSE",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Pausa",
+        "x_keycode": 127
+      }
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "expected": "GRAVE",
+      "observed": {
+        "kind": "layout_click",
+        "label": "\\ / |",
+        "x_keycode": 49
+      }
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "expected": "1",
+      "observed": {
+        "kind": "layout_click",
+        "label": "1 / !",
+        "x_keycode": 10
+      }
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "expected": "2",
+      "observed": {
+        "kind": "layout_click",
+        "label": "2 / \"",
+        "x_keycode": 11
+      }
+    },
+    {
+      "row": 1,
+      "col": 3,
+      "expected": "3",
+      "observed": {
+        "kind": "layout_click",
+        "label": "3 / £",
+        "x_keycode": 12
+      }
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "expected": "4",
+      "observed": {
+        "kind": "layout_click",
+        "label": "4 / $",
+        "x_keycode": 13
+      }
+    },
+    {
+      "row": 1,
+      "col": 5,
+      "expected": "5",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 1,
+      "col": 6,
+      "expected": "6",
+      "observed": {
+        "kind": "layout_click",
+        "label": "6 / &",
+        "x_keycode": 15
+      }
+    },
+    {
+      "row": 1,
+      "col": 7,
+      "expected": "7",
+      "observed": {
+        "kind": "layout_click",
+        "label": "7 / /",
+        "x_keycode": 16
+      }
+    },
+    {
+      "row": 1,
+      "col": 8,
+      "expected": "8",
+      "observed": {
+        "kind": "layout_click",
+        "label": "8 / (",
+        "x_keycode": 17
+      }
+    },
+    {
+      "row": 1,
+      "col": 9,
+      "expected": "9",
+      "observed": {
+        "kind": "layout_click",
+        "label": "9 / )",
+        "x_keycode": 18
+      }
+    },
+    {
+      "row": 1,
+      "col": 10,
+      "expected": "0",
+      "observed": {
+        "kind": "layout_click",
+        "label": "0 / =",
+        "x_keycode": 19
+      }
+    },
+    {
+      "row": 1,
+      "col": 11,
+      "expected": "MINUS",
+      "observed": {
+        "kind": "layout_click",
+        "label": "' / ?",
+        "x_keycode": 20
+      }
+    },
+    {
+      "row": 1,
+      "col": 12,
+      "expected": "EQUAL",
+      "observed": {
+        "kind": "layout_click",
+        "label": "ì / ^",
+        "x_keycode": 21
+      }
+    },
+    {
+      "row": 1,
+      "col": 13,
+      "expected": "BACKSPACE",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Backspace",
+        "x_keycode": 22
+      }
+    },
+    {
+      "row": 1,
+      "col": 14,
+      "expected": "INSERT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Ins",
+        "x_keycode": 118
+      }
+    },
+    {
+      "row": 1,
+      "col": 15,
+      "expected": "HOME",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Home",
+        "x_keycode": 110
+      }
+    },
+    {
+      "row": 1,
+      "col": 16,
+      "expected": "PAGEUP",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Pag ↑",
+        "x_keycode": 112
+      }
+    },
+    {
+      "row": 1,
+      "col": 17,
+      "expected": "NUMLOCK",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Bloc Num",
+        "x_keycode": 77
+      }
+    },
+    {
+      "row": 1,
+      "col": 18,
+      "expected": "KP_SLASH",
+      "observed": {
+        "kind": "layout_click",
+        "label": "/",
+        "x_keycode": 106
+      }
+    },
+    {
+      "row": 1,
+      "col": 19,
+      "expected": "KP_STAR",
+      "observed": {
+        "kind": "layout_click",
+        "label": "*",
+        "x_keycode": 63
+      }
+    },
+    {
+      "row": 1,
+      "col": 20,
+      "expected": "KP_MINUS",
+      "observed": {
+        "kind": "layout_click",
+        "label": "-",
+        "x_keycode": 82
+      }
+    },
+    {
+      "row": 2,
+      "col": 0,
+      "expected": "TAB",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Tab",
+        "x_keycode": 23
+      }
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "expected": "Q",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Q",
+        "x_keycode": 24
+      }
+    },
+    {
+      "row": 2,
+      "col": 2,
+      "expected": "W",
+      "observed": {
+        "kind": "layout_click",
+        "label": "W",
+        "x_keycode": 25
+      }
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "expected": "E",
+      "observed": {
+        "kind": "layout_click",
+        "label": "E",
+        "x_keycode": 26
+      }
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "expected": "R",
+      "observed": {
+        "kind": "layout_click",
+        "label": "R",
+        "x_keycode": 27
+      }
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "expected": "T",
+      "observed": {
+        "kind": "layout_click",
+        "label": "T",
+        "x_keycode": 28
+      }
+    },
+    {
+      "row": 2,
+      "col": 6,
+      "expected": "Y",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Y",
+        "x_keycode": 29
+      }
+    },
+    {
+      "row": 2,
+      "col": 7,
+      "expected": "U",
+      "observed": {
+        "kind": "layout_click",
+        "label": "U",
+        "x_keycode": 30
+      }
+    },
+    {
+      "row": 2,
+      "col": 8,
+      "expected": "I",
+      "observed": {
+        "kind": "layout_click",
+        "label": "I",
+        "x_keycode": 31
+      }
+    },
+    {
+      "row": 2,
+      "col": 9,
+      "expected": "O",
+      "observed": {
+        "kind": "layout_click",
+        "label": "O",
+        "x_keycode": 32
+      }
+    },
+    {
+      "row": 2,
+      "col": 10,
+      "expected": "P",
+      "observed": {
+        "kind": "layout_click",
+        "label": "P",
+        "x_keycode": 33
+      }
+    },
+    {
+      "row": 2,
+      "col": 11,
+      "expected": "LBRACKET",
+      "observed": {
+        "kind": "layout_click",
+        "label": "è / é",
+        "x_keycode": 34
+      }
+    },
+    {
+      "row": 2,
+      "col": 12,
+      "expected": "RBRACKET",
+      "observed": {
+        "kind": "layout_click",
+        "label": "+ / *",
+        "x_keycode": 35
+      }
+    },
+    {
+      "row": 2,
+      "col": 13,
+      "expected": "ENTER",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 2,
+      "col": 14,
+      "expected": "DELETE",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Canc",
+        "x_keycode": 119
+      }
+    },
+    {
+      "row": 2,
+      "col": 15,
+      "expected": "END",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Fine",
+        "x_keycode": 115
+      }
+    },
+    {
+      "row": 2,
+      "col": 16,
+      "expected": "PAGEDOWN",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Pag ↓",
+        "x_keycode": 117
+      }
+    },
+    {
+      "row": 2,
+      "col": 17,
+      "expected": "KP_7",
+      "observed": {
+        "kind": "layout_click",
+        "label": "7 / Home",
+        "x_keycode": 79
+      }
+    },
+    {
+      "row": 2,
+      "col": 18,
+      "expected": "KP_8",
+      "observed": {
+        "kind": "layout_click",
+        "label": "8 / ↑",
+        "x_keycode": 80
+      }
+    },
+    {
+      "row": 2,
+      "col": 19,
+      "expected": "KP_9",
+      "observed": {
+        "kind": "layout_click",
+        "label": "9 / Pag ↑",
+        "x_keycode": 81
+      }
+    },
+    {
+      "row": 2,
+      "col": 20,
+      "expected": "KP_PLUS",
+      "observed": {
+        "kind": "layout_click",
+        "label": "+",
+        "x_keycode": 86
+      }
+    },
+    {
+      "row": 3,
+      "col": 0,
+      "expected": "CAPSLOCK",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Bloc Maiusc",
+        "x_keycode": 66
+      }
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "expected": "A",
+      "observed": {
+        "kind": "layout_click",
+        "label": "A",
+        "x_keycode": 38
+      }
+    },
+    {
+      "row": 3,
+      "col": 2,
+      "expected": "S",
+      "observed": {
+        "kind": "layout_click",
+        "label": "S",
+        "x_keycode": 39
+      }
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "expected": "D",
+      "observed": {
+        "kind": "layout_click",
+        "label": "D",
+        "x_keycode": 40
+      }
+    },
+    {
+      "row": 3,
+      "col": 4,
+      "expected": "F",
+      "observed": {
+        "kind": "layout_click",
+        "label": "F",
+        "x_keycode": 41
+      }
+    },
+    {
+      "row": 3,
+      "col": 5,
+      "expected": "G",
+      "observed": {
+        "kind": "layout_click",
+        "label": "G",
+        "x_keycode": 42
+      }
+    },
+    {
+      "row": 3,
+      "col": 6,
+      "expected": "H",
+      "observed": {
+        "kind": "layout_click",
+        "label": "H",
+        "x_keycode": 43
+      }
+    },
+    {
+      "row": 3,
+      "col": 7,
+      "expected": "J",
+      "observed": {
+        "kind": "layout_click",
+        "label": "J",
+        "x_keycode": 44
+      }
+    },
+    {
+      "row": 3,
+      "col": 8,
+      "expected": "K",
+      "observed": {
+        "kind": "layout_click",
+        "label": "K",
+        "x_keycode": 45
+      }
+    },
+    {
+      "row": 3,
+      "col": 9,
+      "expected": "L",
+      "observed": {
+        "kind": "layout_click",
+        "label": "L",
+        "x_keycode": 46
+      }
+    },
+    {
+      "row": 3,
+      "col": 10,
+      "expected": "SEMICOLON",
+      "observed": {
+        "kind": "layout_click",
+        "label": "ò / ç",
+        "x_keycode": 47
+      }
+    },
+    {
+      "row": 3,
+      "col": 11,
+      "expected": "APOSTROPHE",
+      "observed": {
+        "kind": "layout_click",
+        "label": "à / °",
+        "x_keycode": 48
+      }
+    },
+    {
+      "row": 3,
+      "col": 12,
+      "expected": "ISO_HASH",
+      "observed": {
+        "kind": "layout_click",
+        "label": "ù / §",
+        "x_keycode": 51
+      }
+    },
+    {
+      "row": 3,
+      "col": 13,
+      "expected": "ISO_BACKSLASH",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Invio",
+        "x_keycode": 36
+      }
+    },
+    {
+      "row": 3,
+      "col": 17,
+      "expected": "KP_4",
+      "observed": {
+        "kind": "layout_click",
+        "label": "4 / ←",
+        "x_keycode": 83
+      }
+    },
+    {
+      "row": 3,
+      "col": 18,
+      "expected": "KP_5",
+      "observed": {
+        "kind": "layout_click",
+        "label": "5",
+        "x_keycode": 84
+      }
+    },
+    {
+      "row": 3,
+      "col": 19,
+      "expected": "KP_6",
+      "observed": {
+        "kind": "layout_click",
+        "label": "6 / →",
+        "x_keycode": 85
+      }
+    },
+    {
+      "row": 4,
+      "col": 0,
+      "expected": "LSHIFT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Maiusc",
+        "x_keycode": 50
+      }
+    },
+    {
+      "row": 4,
+      "col": 1,
+      "expected": "Z",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Z",
+        "x_keycode": 52
+      }
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "expected": "X",
+      "observed": {
+        "kind": "layout_click",
+        "label": "X",
+        "x_keycode": 53
+      }
+    },
+    {
+      "row": 4,
+      "col": 3,
+      "expected": "C",
+      "observed": {
+        "kind": "layout_click",
+        "label": "C",
+        "x_keycode": 54
+      }
+    },
+    {
+      "row": 4,
+      "col": 4,
+      "expected": "V",
+      "observed": {
+        "kind": "layout_click",
+        "label": "V",
+        "x_keycode": 55
+      }
+    },
+    {
+      "row": 4,
+      "col": 5,
+      "expected": "B",
+      "observed": {
+        "kind": "layout_click",
+        "label": "B",
+        "x_keycode": 56
+      }
+    },
+    {
+      "row": 4,
+      "col": 6,
+      "expected": "N",
+      "observed": {
+        "kind": "layout_click",
+        "label": "N",
+        "x_keycode": 57
+      }
+    },
+    {
+      "row": 4,
+      "col": 7,
+      "expected": "M",
+      "observed": {
+        "kind": "layout_click",
+        "label": "M",
+        "x_keycode": 58
+      }
+    },
+    {
+      "row": 4,
+      "col": 8,
+      "expected": "COMMA",
+      "observed": {
+        "kind": "layout_click",
+        "label": ", / ;",
+        "x_keycode": 59
+      }
+    },
+    {
+      "row": 4,
+      "col": 9,
+      "expected": "DOT",
+      "observed": {
+        "kind": "layout_click",
+        "label": ". / :",
+        "x_keycode": 60
+      }
+    },
+    {
+      "row": 4,
+      "col": 10,
+      "expected": "SLASH",
+      "observed": {
+        "kind": "layout_click",
+        "label": "- / _",
+        "x_keycode": 61
+      }
+    },
+    {
+      "row": 4,
+      "col": 11,
+      "expected": "INTL_BACKSLASH",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 4,
+      "col": 12,
+      "expected": "RSHIFT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Maiusc",
+        "x_keycode": 62
+      }
+    },
+    {
+      "row": 4,
+      "col": 13,
+      "expected": "MENU",
+      "observed": {
+        "kind": "layout_click",
+        "label": "< / >",
+        "x_keycode": 94
+      }
+    },
+    {
+      "row": 4,
+      "col": 15,
+      "expected": "UP",
+      "observed": {
+        "kind": "layout_click",
+        "label": "↑",
+        "x_keycode": 111
+      }
+    },
+    {
+      "row": 4,
+      "col": 17,
+      "expected": "KP_1",
+      "observed": {
+        "kind": "layout_click",
+        "label": "1 / Fine",
+        "x_keycode": 87
+      }
+    },
+    {
+      "row": 4,
+      "col": 18,
+      "expected": "KP_2",
+      "observed": {
+        "kind": "layout_click",
+        "label": "2 / ↓",
+        "x_keycode": 88
+      }
+    },
+    {
+      "row": 4,
+      "col": 19,
+      "expected": "KP_3",
+      "observed": {
+        "kind": "layout_click",
+        "label": "3 / Pag ↓",
+        "x_keycode": 89
+      }
+    },
+    {
+      "row": 5,
+      "col": 0,
+      "expected": "LCTRL",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Ctrl",
+        "x_keycode": 37
+      }
+    },
+    {
+      "row": 5,
+      "col": 1,
+      "expected": "LGUI",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Win",
+        "x_keycode": 133
+      }
+    },
+    {
+      "row": 5,
+      "col": 2,
+      "expected": "LALT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Alt",
+        "x_keycode": 64
+      }
+    },
+    {
+      "row": 5,
+      "col": 5,
+      "expected": "SPACE",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Spazio",
+        "x_keycode": 65
+      }
+    },
+    {
+      "row": 5,
+      "col": 8,
+      "expected": "RALT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Alt Gr",
+        "x_keycode": 108
+      }
+    },
+    {
+      "row": 5,
+      "col": 9,
+      "expected": "FN",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Fn",
+        "x_keycode": null
+      }
+    },
+    {
+      "row": 5,
+      "col": 10,
+      "expected": "MENU",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Menu",
+        "x_keycode": 135
+      }
+    },
+    {
+      "row": 5,
+      "col": 12,
+      "expected": "RCTRL",
+      "observed": {
+        "kind": "layout_click",
+        "label": "Ctrl",
+        "x_keycode": 105
+      }
+    },
+    {
+      "row": 5,
+      "col": 14,
+      "expected": "LEFT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "←",
+        "x_keycode": 113
+      }
+    },
+    {
+      "row": 5,
+      "col": 15,
+      "expected": "DOWN",
+      "observed": {
+        "kind": "layout_click",
+        "label": "↓",
+        "x_keycode": 116
+      }
+    },
+    {
+      "row": 5,
+      "col": 16,
+      "expected": "RIGHT",
+      "observed": {
+        "kind": "layout_click",
+        "label": "→",
+        "x_keycode": 114
+      }
+    },
+    {
+      "row": 5,
+      "col": 17,
+      "expected": "KP_0",
+      "observed": {
+        "kind": "layout_click",
+        "label": "0 / Ins",
+        "x_keycode": 90
+      }
+    },
+    {
+      "row": 5,
+      "col": 19,
+      "expected": "KP_DOT",
+      "observed": {
+        "kind": "layout_click",
+        "label": ". / Canc",
+        "x_keycode": 91
+      }
+    }
+  ]
+}

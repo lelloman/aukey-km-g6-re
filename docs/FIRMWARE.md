@@ -91,8 +91,11 @@ for vertically stabilized keys. Hardware testing places main Enter at row 3,
 column 13 and keypad Enter at row 4, column 20. The ISO `<` key is at row 4,
 column 13.
 
-P0.1-P0.4 and P3.6 remain board-specific auxiliary/indicator candidates and
-must not be driven by replacement firmware until their roles are confirmed.
+Stock routine 0x7269 confirms P0.2/P0.3/P0.4 as active-low Num/Caps/Scroll
+Lock indicators. Stock enables their output direction and pull-ups (mask
+0x1C at 0x6336). The stock-PWM candidate implements this setup and mapping.
+P0.1 and P3.6 remain unconfirmed auxiliary candidates and must not be driven
+until their roles are confirmed.
 
 ## Safety observations
 

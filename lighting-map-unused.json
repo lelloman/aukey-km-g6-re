@@ -1,0 +1,173 @@
+{
+  "format": 1,
+  "complete": true,
+  "device": "/dev/hidraw4",
+  "mapped": 20,
+  "total": 20,
+  "slots": [
+    {
+      "row": 0,
+      "col": 0,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 0,
+      "col": 17,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 0,
+      "col": 18,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 0,
+      "col": 19,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 0,
+      "col": 20,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 3,
+      "col": 14,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 3,
+      "col": 15,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 3,
+      "col": 16,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 3,
+      "col": 20,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 4,
+      "col": 14,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 4,
+      "col": 16,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 4,
+      "col": 20,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "manual_confirmation",
+        "label": "Invio tast.",
+        "x_keycode": 104
+      }
+    },
+    {
+      "row": 5,
+      "col": 3,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none",
+        "source": "manual_confirmation"
+      }
+    },
+    {
+      "row": 5,
+      "col": 4,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none",
+        "source": "manual_confirmation"
+      }
+    },
+    {
+      "row": 5,
+      "col": 6,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 5,
+      "col": 7,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 5,
+      "col": 11,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 5,
+      "col": 13,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 5,
+      "col": 18,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    },
+    {
+      "row": 5,
+      "col": 20,
+      "expected": "UNKNOWN",
+      "observed": {
+        "kind": "none"
+      }
+    }
+  ]
+}

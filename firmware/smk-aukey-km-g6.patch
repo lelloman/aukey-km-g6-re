@@ -23,7 +23,7 @@ index f52e7c7..a4c0778 100644
          ]
  
 +        if options.get('host_lighting', '0') == '1'
-+            cc_args += '-DHOST_LIGHTING_ENABLE=1'
++            cc_args += ['-DHOST_LIGHTING_ENABLE=1', '-DLED_SUBFRAMES_PER_SCAN=6']
 +        endif
 +
          wireless = options.get('wireless', '')
@@ -86,7 +86,7 @@ new file mode 100644
 index 0000000..2a44391
 --- /dev/null
 +++ b/src/keyboards/aukey-km-g6/kbdef.h
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,123 @@
 +#pragma once
 +
 +#include "sh68f90.h"
@@ -204,17 +204,18 @@ index 0000000..2a44391
 +#define LED_R4 P6_4
 +#define LED_R5 P6_5
 +
-+// KC_CAPS LED Pin
++// Stock lock indicators: active-low P0.2/P0.3/P0.4.
++#define LED_NUM P0_2
 +#define LED_CAPS P0_3
++#define LED_SCROLL P0_4
 +
-+// KC_CAPS LED Pin Bit
-+#define LED_CAPS_P0_3 _P0_3
++#define LED_LOCK_MASK (uint8_t)(_P0_2 | _P0_3 | _P0_4)
 diff --git a/src/keyboards/aukey-km-g6/layouts/default/indicators.c b/src/keyboards/aukey-km-g6/layouts/default/indicators.c
 new file mode 100644
 index 0000000..8aeecf0
 --- /dev/null
 +++ b/src/keyboards/aukey-km-g6/layouts/default/indicators.c
-@@ -0,0 +1,250 @@
+@@ -0,0 +1,245 @@
 +#include "indicators.h"
 +#include "sh68f90.h"
 +#include "kbdef.h"
@@ -230,7 +231,19 @@ index 0000000..8aeecf0
 +
 +#define LED_PHASE_SPEED 4
 +
-+#define LED_DUTY(v) (uint16_t)(0x0400u - ((uint16_t)(v) << 2))
++/* Stock 0x2BEC / 0x6DF4: clock selector 7, channel start bit 3.
++ * Preserve the observed control bytes without guessing their frequency. */
++#define STOCK_PWM_BLANK 0x87
++#define STOCK_PWM_LIT   0x8f
++#define SET_STOCK_PWM(channel, value) do { \
++    uint8_t intensity = (value); \
++    if (intensity) { \
++        channel##CON = STOCK_PWM_LIT; \
++        SET_PWM_DUTY(channel, (uint16_t)0, (uint16_t)intensity); \
++    } \
++} while (0)
++/* Expand LED_PWM_Cn aliases before token pasting. */
++#define SET_LED_PWM(channel, value) SET_STOCK_PWM(channel, value)
 +
 +#define LED_ALL_ROWS (uint8_t)(LED_R0_P6_0 | LED_R1_P6_1 | LED_R2_P6_2 | LED_R3_P6_3 | LED_R4_P6_4 | LED_R5_P6_5)
 +
@@ -263,7 +276,7 @@ index 0000000..8aeecf0
 +        user_settings.led_effect = FX_RADIAL;
 +    }
 +
-+    indicators_pwm_enable();
++    indicators_pwm_disable();
 +}
 +
 +void indicators_next_effect()
@@ -292,36 +305,30 @@ index 0000000..8aeecf0
 +{
 +    current_step;
 +
++    /* Host HID LED bits, independent of the backlight effect or frame. */
++    LED_NUM = !(keyboard->led_state & (1 << 0));
 +    LED_CAPS = !(keyboard->led_state & (1 << 1));
++    LED_SCROLL = !(keyboard->led_state & (1 << 2));
 +
 +    if (!host_lighting_is_active() && user_settings.led_effect >= FX_OFF) {
 +        return false;
 +    }
 +
-+    led_regen_one();
++    if (!host_lighting_is_active()) led_regen_one();
 +
-+    led_enable_row();
 +    led_set_columns();
++    led_enable_row();
 +
 +    if (++led_row >= LED_ROWS) {
 +        led_row = 0;
 +    }
 +
-+    return false;
++    return led_row == 0;
 +}
 +
 +void indicators_post_update()
 +{
-+    PWM00CON &= ~(1 << 5);
-+
-+    /* Host mode deliberately uses direct GPIO first.  This provides a
-+     * hardware-diagnostic path independent of the still-unverified PWM
-+     * routing on the KM-G6. */
-+    if (host_lighting_is_active()) {
-+        return;
-+    }
-+
-+    indicators_pwm_enable();
++    /* Channels are started individually while programming the row. */
 +}
 +
 +static void led_regen_one()
@@ -369,108 +376,90 @@ index 0000000..8aeecf0
 +    __xdata uint8_t *fb = led_fb[led_row];
 +
 +    if (host_lighting_is_active()) {
-+        KB_C0  = host_lighting_get(led_row, 0)  ? 1 : 0;
-+        KB_C1  = host_lighting_get(led_row, 1)  ? 1 : 0;
-+        KB_C2  = host_lighting_get(led_row, 2)  ? 1 : 0;
-+        KB_C3  = host_lighting_get(led_row, 3)  ? 1 : 0;
-+        KB_C4  = host_lighting_get(led_row, 4)  ? 1 : 0;
-+        KB_C5  = host_lighting_get(led_row, 5)  ? 1 : 0;
-+        KB_C6  = host_lighting_get(led_row, 6)  ? 1 : 0;
-+        KB_C7  = host_lighting_get(led_row, 7)  ? 1 : 0;
-+        KB_C8  = host_lighting_get(led_row, 8)  ? 1 : 0;
-+        KB_C9  = host_lighting_get(led_row, 9)  ? 1 : 0;
-+        KB_C10 = host_lighting_get(led_row, 10) ? 1 : 0;
-+        KB_C11 = host_lighting_get(led_row, 11) ? 1 : 0;
-+        KB_C12 = host_lighting_get(led_row, 12) ? 1 : 0;
-+        KB_C13 = host_lighting_get(led_row, 13) ? 1 : 0;
-+        KB_C14 = host_lighting_get(led_row, 14) ? 1 : 0;
-+        KB_C15 = host_lighting_get(led_row, 15) ? 1 : 0;
-+        KB_C16 = host_lighting_get(led_row, 16) ? 1 : 0;
-+        KB_C17 = host_lighting_get(led_row, 17) ? 1 : 0;
-+        KB_C18 = host_lighting_get(led_row, 18) ? 1 : 0;
-+        KB_C19 = host_lighting_get(led_row, 19) ? 1 : 0;
-+        KB_C20 = host_lighting_get(led_row, 20) ? 1 : 0;
++        SET_LED_PWM(LED_PWM_C0, host_lighting_get(led_row, 0));
++        SET_LED_PWM(LED_PWM_C1, host_lighting_get(led_row, 1));
++        SET_LED_PWM(LED_PWM_C2, host_lighting_get(led_row, 2));
++        SET_LED_PWM(LED_PWM_C3, host_lighting_get(led_row, 3));
++        SET_LED_PWM(LED_PWM_C4, host_lighting_get(led_row, 4));
++        SET_LED_PWM(LED_PWM_C5, host_lighting_get(led_row, 5));
++        SET_LED_PWM(LED_PWM_C6, host_lighting_get(led_row, 6));
++        SET_LED_PWM(LED_PWM_C7, host_lighting_get(led_row, 7));
++        SET_LED_PWM(LED_PWM_C8, host_lighting_get(led_row, 8));
++        SET_LED_PWM(LED_PWM_C9, host_lighting_get(led_row, 9));
++        SET_LED_PWM(LED_PWM_C10, host_lighting_get(led_row, 10));
++        SET_LED_PWM(LED_PWM_C11, host_lighting_get(led_row, 11));
++        SET_LED_PWM(LED_PWM_C12, host_lighting_get(led_row, 12));
++        SET_LED_PWM(LED_PWM_C13, host_lighting_get(led_row, 13));
++        SET_LED_PWM(LED_PWM_C14, host_lighting_get(led_row, 14));
++        SET_LED_PWM(LED_PWM_C15, host_lighting_get(led_row, 15));
++        SET_LED_PWM(LED_PWM_C16, host_lighting_get(led_row, 16));
++        SET_LED_PWM(LED_PWM_C17, host_lighting_get(led_row, 17));
++        SET_LED_PWM(LED_PWM_C18, host_lighting_get(led_row, 18));
++        SET_LED_PWM(LED_PWM_C19, host_lighting_get(led_row, 19));
++        SET_LED_PWM(LED_PWM_C20, host_lighting_get(led_row, 20));
 +        return;
 +    }
 +
-+    SET_PWM_DUTY_2(LED_PWM_C0, LED_DUTY(fb[0]));
-+    SET_PWM_DUTY_2(LED_PWM_C1, LED_DUTY(fb[1]));
-+    SET_PWM_DUTY_2(LED_PWM_C2, LED_DUTY(fb[2]));
-+    SET_PWM_DUTY_2(LED_PWM_C3, LED_DUTY(fb[3]));
-+    SET_PWM_DUTY_2(LED_PWM_C4, LED_DUTY(fb[4]));
-+    SET_PWM_DUTY_2(LED_PWM_C5, LED_DUTY(fb[5]));
-+    SET_PWM_DUTY_2(LED_PWM_C6, LED_DUTY(fb[6]));
-+    SET_PWM_DUTY_2(LED_PWM_C7, LED_DUTY(fb[7]));
-+    SET_PWM_DUTY_2(LED_PWM_C8, LED_DUTY(fb[8]));
-+    SET_PWM_DUTY_2(LED_PWM_C9, LED_DUTY(fb[9]));
-+    SET_PWM_DUTY_2(LED_PWM_C10, LED_DUTY(fb[10]));
-+    SET_PWM_DUTY_2(LED_PWM_C11, LED_DUTY(fb[11]));
-+    SET_PWM_DUTY_2(LED_PWM_C12, LED_DUTY(fb[12]));
-+    SET_PWM_DUTY_2(LED_PWM_C13, LED_DUTY(fb[13]));
-+    SET_PWM_DUTY_2(LED_PWM_C14, LED_DUTY(fb[14]));
-+    SET_PWM_DUTY_2(LED_PWM_C15, LED_DUTY(fb[15]));
-+    SET_PWM_DUTY_2(LED_PWM_C16, LED_DUTY(fb[16]));
-+    SET_PWM_DUTY_2(LED_PWM_C17, LED_DUTY(fb[17]));
-+    SET_PWM_DUTY_2(LED_PWM_C18, LED_DUTY(fb[18]));
-+    SET_PWM_DUTY_2(LED_PWM_C19, LED_DUTY(fb[19]));
-+    SET_PWM_DUTY_2(LED_PWM_C20, LED_DUTY(fb[20]));
++    SET_LED_PWM(LED_PWM_C0, fb[0]);
++    SET_LED_PWM(LED_PWM_C1, fb[1]);
++    SET_LED_PWM(LED_PWM_C2, fb[2]);
++    SET_LED_PWM(LED_PWM_C3, fb[3]);
++    SET_LED_PWM(LED_PWM_C4, fb[4]);
++    SET_LED_PWM(LED_PWM_C5, fb[5]);
++    SET_LED_PWM(LED_PWM_C6, fb[6]);
++    SET_LED_PWM(LED_PWM_C7, fb[7]);
++    SET_LED_PWM(LED_PWM_C8, fb[8]);
++    SET_LED_PWM(LED_PWM_C9, fb[9]);
++    SET_LED_PWM(LED_PWM_C10, fb[10]);
++    SET_LED_PWM(LED_PWM_C11, fb[11]);
++    SET_LED_PWM(LED_PWM_C12, fb[12]);
++    SET_LED_PWM(LED_PWM_C13, fb[13]);
++    SET_LED_PWM(LED_PWM_C14, fb[14]);
++    SET_LED_PWM(LED_PWM_C15, fb[15]);
++    SET_LED_PWM(LED_PWM_C16, fb[16]);
++    SET_LED_PWM(LED_PWM_C17, fb[17]);
++    SET_LED_PWM(LED_PWM_C18, fb[18]);
++    SET_LED_PWM(LED_PWM_C19, fb[19]);
++    SET_LED_PWM(LED_PWM_C20, fb[20]);
 +}
 +
 +void indicators_pwm_enable()
 +{
-+    // TODO: try abstracting individual banks away
-+    PWM00CON = (uint8_t)(PWM_MODE_ENABLE | PWM_INT_ENABLE | PWM_SS | PWM_CLK_DIV_4);
-+    PWM01CON = PWM_SS;
-+    PWM02CON = PWM_SS;
-+    PWM03CON = PWM_SS;
-+    PWM04CON = PWM_SS;
-+    PWM05CON = PWM_SS;
-+
-+    PWM10CON = (uint8_t)(PWM_MODE_ENABLE | PWM_SS | PWM_CLK_DIV_4);
-+    PWM11CON = PWM_SS;
-+    PWM12CON = PWM_SS;
-+    PWM13CON = PWM_SS;
-+    PWM14CON = PWM_SS;
-+    PWM15CON = PWM_SS;
-+
-+    PWM20CON = (uint8_t)(PWM_MODE_ENABLE | PWM_SS | PWM_CLK_DIV_4);
-+    PWM21CON = PWM_SS;
-+    PWM22CON = PWM_SS;
-+    PWM23CON = PWM_SS;
-+    PWM24CON = PWM_SS;
-+    PWM25CON = PWM_SS;
-+
-+    PWM40CON = (uint8_t)(PWM_MODE_ENABLE | PWM_SS | PWM_CLK_DIV_4);
-+    PWM41CON = PWM_SS;
-+    PWM42CON = PWM_SS;
++    /* Matrix scanning must not restart channels or select an LED row. */
 +}
 +
 +void indicators_pwm_disable()
 +{
++    GPIO_HIGH(6, LED_ALL_ROWS);
 +    // TODO: try abstracting individual banks away
-+    PWM00CON = PWM_CON_PARKED;
-+    PWM01CON = PWM_CON_OFF;
-+    PWM02CON = PWM_CON_OFF;
-+    PWM03CON = PWM_CON_OFF;
-+    PWM04CON = PWM_CON_OFF;
-+    PWM05CON = PWM_CON_OFF;
++    PWM00CON = STOCK_PWM_BLANK;
++    PWM01CON = STOCK_PWM_BLANK;
++    PWM02CON = STOCK_PWM_BLANK;
++    PWM03CON = STOCK_PWM_BLANK;
++    PWM04CON = STOCK_PWM_BLANK;
++    PWM05CON = STOCK_PWM_BLANK;
 +
-+    PWM10CON = PWM_CON_PARKED;
-+    PWM11CON = PWM_CON_OFF;
-+    PWM12CON = PWM_CON_OFF;
-+    PWM13CON = PWM_CON_OFF;
-+    PWM14CON = PWM_CON_OFF;
-+    PWM15CON = PWM_CON_OFF;
++    PWM10CON = STOCK_PWM_BLANK;
++    PWM11CON = STOCK_PWM_BLANK;
++    PWM12CON = STOCK_PWM_BLANK;
++    PWM13CON = STOCK_PWM_BLANK;
++    PWM14CON = STOCK_PWM_BLANK;
++    PWM15CON = STOCK_PWM_BLANK;
 +
-+    PWM20CON = PWM_CON_PARKED;
-+    PWM21CON = PWM_CON_OFF;
-+    PWM22CON = PWM_CON_OFF;
-+    PWM23CON = PWM_CON_OFF;
-+    PWM24CON = PWM_CON_OFF;
-+    PWM25CON = PWM_CON_OFF;
-+    PWM40CON = PWM_CON_PARKED;
-+    PWM41CON = PWM_CON_OFF;
-+    PWM42CON = PWM_CON_OFF;
++    PWM20CON = STOCK_PWM_BLANK;
++    PWM21CON = STOCK_PWM_BLANK;
++    PWM22CON = STOCK_PWM_BLANK;
++    PWM23CON = STOCK_PWM_BLANK;
++    PWM24CON = STOCK_PWM_BLANK;
++    PWM25CON = STOCK_PWM_BLANK;
++    PWM40CON = STOCK_PWM_BLANK;
++    PWM41CON = STOCK_PWM_BLANK;
++    PWM42CON = STOCK_PWM_BLANK;
++    /* Stock clears the shared column latches after disabling channels. */
++    GPIO_LOW(1, 0x3f);
++    GPIO_LOW(2, 0x3f);
++    GPIO_LOW(3, 0x3f);
++    GPIO_LOW(5, 0x07);
 +}
 diff --git a/src/keyboards/aukey-km-g6/layouts/default/layout.c b/src/keyboards/aukey-km-g6/layouts/default/layout.c
 new file mode 100644
@@ -515,15 +504,15 @@ new file mode 100644
 index 0000000..1cfe289
 --- /dev/null
 +++ b/src/keyboards/aukey-km-g6/user_init.c
-@@ -0,0 +1,91 @@
+@@ -0,0 +1,96 @@
 +#include "kbdef.h"
 +#include "user_init.h"
 +#include "pwm.h"
 +#include "gpio.h"
 +
-+#define PWM_PERD 0x0400
++#define PWM_PERD 0x0100
 +
-+#define PWM_DUTY1 (uint16_t)PWM_PERD
++#define PWM_DUTY1 (uint16_t)0
 +#define PWM_DUTY2 (uint16_t)0
 +
 +#define PWM_PERDH_INIT ((uint8_t)(PWM_PERD >> 8))
@@ -537,7 +526,7 @@ index 0000000..1cfe289
 +    user_gpio_init();
 +    user_pwm_init();
 +
-+    IEN1 |= _EPWM0;
++    IEN1 &= (uint8_t)~_EPWM0;
 +}
 +
 +void user_gpio_init()
@@ -556,7 +545,10 @@ index 0000000..1cfe289
 +
 +    DRVCON = DRVCON_LOCK;
 +
-+    GPIO_DIR_WRITE(0, (uint8_t)(LED_CAPS_P0_3));
++    /* Latch off before enabling outputs; preserve unrelated P0 pins. */
++    GPIO_HIGH(0, LED_LOCK_MASK);
++    GPIO_PULLUP_ON(0, LED_LOCK_MASK);
++    GPIO_OUTPUT(0, LED_LOCK_MASK);
 +    GPIO_DIR_WRITE(1, (uint8_t)(KB_C0_P1_4 | KB_C1_P1_5 | KB_C14_P1_3 | KB_C15_P1_2 | KB_C16_P1_1 | KB_C17_P1_0));
 +    GPIO_DIR_WRITE(2, (uint8_t)(KB_C2_P2_0 | KB_C3_P2_1 | KB_C4_P2_2 | KB_C5_P2_3 | KB_C6_P2_4 | KB_C7_P2_5));
 +    GPIO_DIR_WRITE(3, (uint8_t)(KB_C8_P3_0 | KB_C9_P3_1 | KB_C10_P3_2 | KB_C11_P3_3 | KB_C12_P3_4 | KB_C13_P3_5));
@@ -566,7 +558,6 @@ index 0000000..1cfe289
 +    GPIO_PULLUP_WRITE(5, (uint8_t)(KB_R4_P5_3 | KB_R5_P5_4));
 +    GPIO_PULLUP_WRITE(7, (uint8_t)(KB_R0_P7_0 | KB_R1_P7_1 | KB_R2_P7_2 | KB_R3_P7_3));
 +
-+    GPIO_WRITE(0, LED_CAPS_P0_3);
 +    GPIO_WRITE(1, (uint8_t)(KB_C0_P1_4 | KB_C1_P1_5 | KB_C14_P1_3 | KB_C15_P1_2 | KB_C16_P1_1 | KB_C17_P1_0));
 +    GPIO_WRITE(2, (uint8_t)(KB_C2_P2_0 | KB_C3_P2_1 | KB_C4_P2_2 | KB_C5_P2_3 | KB_C6_P2_4 | KB_C7_P2_5));
 +    GPIO_WRITE(3, (uint8_t)(KB_C8_P3_0 | KB_C9_P3_1 | KB_C10_P3_2 | KB_C11_P3_3 | KB_C12_P3_4 | KB_C13_P3_5));
@@ -584,6 +575,9 @@ index 0000000..1cfe289
 +
 +    PWM2PERDH = PWM_PERDH_INIT;
 +    PWM2PERDL = PWM_PERDL_INIT;
++
++    PWM4PERDH = PWM_PERDH_INIT;
++    PWM4PERDL = PWM_PERDL_INIT;
 +
 +    SET_PWM_DUTY(LED_PWM_C0, PWM_DUTY1, PWM_DUTY2);
 +    SET_PWM_DUTY(LED_PWM_C1, PWM_DUTY1, PWM_DUTY2);
@@ -612,7 +606,7 @@ new file mode 100644
 index 0000000..587fb52
 --- /dev/null
 +++ b/src/keyboards/aukey-km-g6/user_matrix.c
-@@ -0,0 +1,131 @@
+@@ -0,0 +1,155 @@
 +#include "kbdef.h"
 +#include "gpio.h"
 +#include "user_matrix.h"
@@ -621,6 +615,30 @@ index 0000000..587fb52
 +#define KB_C_P2_MASK (uint8_t)(KB_C2_P2_0 | KB_C3_P2_1 | KB_C4_P2_2 | KB_C5_P2_3 | KB_C6_P2_4 | KB_C7_P2_5)
 +#define KB_C_P3_MASK (uint8_t)(KB_C8_P3_0 | KB_C9_P3_1 | KB_C10_P3_2 | KB_C11_P3_3 | KB_C12_P3_4 | KB_C13_P3_5)
 +#define KB_C_P5_MASK (uint8_t)(KB_C18_P5_0 | KB_C19_P5_1 | KB_C20_P5_2)
++#define LED_ROW_MASK (uint8_t)(LED_R0_P6_0 | LED_R1_P6_1 | LED_R2_P6_2 | LED_R3_P6_3 | LED_R4_P6_4 | LED_R5_P6_5)
++
++void user_matrix_scan_pre(void)
++{
++    GPIO_HIGH(6, LED_ROW_MASK);
++    GPIO_OUTPUT(1, KB_C_P1_MASK);
++    GPIO_OUTPUT(2, KB_C_P2_MASK);
++    GPIO_OUTPUT(3, KB_C_P3_MASK);
++    GPIO_OUTPUT(5, KB_C_P5_MASK);
++}
++
++void user_matrix_scan_post(void)
++{
++    user_matrix_cols_deselect_all();
++    GPIO_INPUT(1, KB_C_P1_MASK);
++    GPIO_INPUT(2, KB_C_P2_MASK);
++    GPIO_INPUT(3, KB_C_P3_MASK);
++    GPIO_INPUT(5, KB_C_P5_MASK);
++}
++
++void user_matrix_sinks_off(void)
++{
++    GPIO_HIGH(6, LED_ROW_MASK);
++}
 +
 +void user_matrix_cols_deselect_all(void)
 +{
