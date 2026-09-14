@@ -156,7 +156,14 @@ source. No keyboard writes or flashing were performed during the build;
 the user subsequently tested the candidate on hardware.
 
 Candidate: `firmware/build/aukey-km-g6_stock-pwm-candidate.hex`
-SHA-256 (including lock indicators): `3409b2abbf94231fb93c0625076f248f91e4adc4dbb7818ba98ce8defd5fafb3`.
+SHA-256 (including lock indicators and Fn+F10/F11 volume shortcuts):
+`f75ae815d3b578b6e348886e8ff23dd65983776bab164283673f3ad43ea50d2d`.
+The previously tested lock-indicator image had SHA-256
+`3409b2abbf94231fb93c0625076f248f91e4adc4dbb7818ba98ce8defd5fafb3`;
+it is retained locally as `firmware/build/aukey-km-g6_stock-pwm-before-fn-volume.hex`.
+The volume-shortcut update changes only two Fn-layer entries and has passed
+compilation, host keymap/consumer-code checks, and interrupt checks; hardware
+validation is pending.
 The build script now writes that separate candidate filename. The previous
 working default image and its pinned hash are preserved. The guarded flash
 command selects the candidate only with `--stock-pwm-candidate`, checking

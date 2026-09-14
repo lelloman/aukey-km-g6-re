@@ -27,6 +27,13 @@ Run `python3 firmware/test-lock-indicators.py` for host-side logic checks.
 The user reports working lock indicators and visible brightness control
 across 0–255; Scroll Lock has not been separately confirmed.
 
+The candidate also restores **Fn+F10** (volume down) and **Fn+F11**
+(volume up) using standard USB consumer reports. F10/F11 without Fn retain
+their normal behavior; all other Fn-layer positions remain transparent.
+This update builds and passes host-side keymap/consumer-code checks, but
+the volume shortcuts have not yet been tested on hardware. Its SHA-256 is
+`f75ae815d3b578b6e348886e8ff23dd65983776bab164283673f3ad43ea50d2d`.
+
 The active-low LED-row correction produces SHA-256
 `3357372b13a94605b2717ce0ff391144434bd2bcc6feaf22a78fae3922c00fad`.
 SMK's interrupt checker reported all 14 vectors claimed and no ISR overlay
