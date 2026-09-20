@@ -1015,3 +1015,49 @@ index 81ef41a..df6a294 100644
      } else {
          usb_ep0_state = 0;
          CLEAR_EP0_CNT;
+diff --git a/src/smk/matrix.c b/src/smk/matrix.c
+index 0044791..1d0d825 100644
+--- a/src/smk/matrix.c
++++ b/src/smk/matrix.c
+@@ -24,6 +24,9 @@ uint8_t action_layer;
+
+ uint8_t default_layer;
+
++// Pair each release with the keycode selected on press, even after Fn changes.
++static uint16_t pressed_keycodes[MATRIX_COLS][MATRIX_ROWS];
++
+ void matrix_init()
+ {
+     action_layer   = 0;
+@@ -33,6 +36,9 @@ void matrix_init()
+     for (int i = 0; i < MATRIX_COLS; i++) {
+         matrix[i]          = 0;
+         matrix_previous[i] = 0;
++        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
++            pressed_keycodes[i][row] = KC_NO;
++        }
+     }
+ }
+
+@@ -92,13 +98,19 @@ static void process_key_state(uint8_t row, uint8_t col, bool pressed)
+         if (pressed) {
+             action_layer = QK_MOMENTARY_GET_LAYER(base);
+         } else {
+-            clear_keys();
+             action_layer = 0;
+         }
+         return;
+     }
+
+-    const uint16_t qcode = resolve_keycode(base, row, col);
++    uint16_t qcode;
++    if (pressed) {
++        qcode = resolve_keycode(base, row, col);
++        pressed_keycodes[col][row] = qcode;
++    } else {
++        qcode = pressed_keycodes[col][row];
++        pressed_keycodes[col][row] = KC_NO;
++    }
+
+     if (!kb_process_record(qcode, pressed)) {
+         return;

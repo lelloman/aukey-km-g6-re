@@ -15,7 +15,7 @@ for arg in "$@"; do
         --yes-i-accept-brick-risk) accepted_risk=true ;;
         --stock-pwm-candidate)
             image="$repo_root/firmware/build/aukey-km-g6_stock-pwm-candidate.hex"
-            expected_image_sha=f75ae815d3b578b6e348886e8ff23dd65983776bab164283673f3ad43ea50d2d
+            expected_image_sha=7d6946742519bcfba783049e5072b640a3c09034bb1c23709f6fc9af2fd83e80
             ;;
         --dry-run) dry_run=true ;;
         *) echo "Unknown argument: $arg" >&2; exit 2 ;;

@@ -30,9 +30,13 @@ across 0–255; Scroll Lock has not been separately confirmed.
 The candidate also restores **Fn+F10** (volume down) and **Fn+F11**
 (volume up) using standard USB consumer reports. F10/F11 without Fn retain
 their normal behavior; all other Fn-layer positions remain transparent.
-This update builds and passes host-side keymap/consumer-code checks, but
-the volume shortcuts have not yet been tested on hardware. Its SHA-256 is
-`f75ae815d3b578b6e348886e8ff23dd65983776bab164283673f3ad43ea50d2d`.
+The original volume update could leave volume repeating when Fn was released
+before F10/F11: the release was resolved on the base layer, leaving the consumer
+key held. The matrix now remembers each pressed keycode until its release, and
+releasing Fn preserves unrelated held keys. The build runs a host regression
+test for both volume keys and both release orders, plus base-key presses across
+Fn changes. Hardware validation of this fix is pending. Its SHA-256 is
+`7d6946742519bcfba783049e5072b640a3c09034bb1c23709f6fc9af2fd83e80`.
 
 The active-low LED-row correction produces SHA-256
 `3357372b13a94605b2717ce0ff391144434bd2bcc6feaf22a78fae3922c00fad`.

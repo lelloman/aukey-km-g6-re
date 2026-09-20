@@ -156,14 +156,18 @@ source. No keyboard writes or flashing were performed during the build;
 the user subsequently tested the candidate on hardware.
 
 Candidate: `firmware/build/aukey-km-g6_stock-pwm-candidate.hex`
-SHA-256 (including lock indicators and Fn+F10/F11 volume shortcuts):
-`f75ae815d3b578b6e348886e8ff23dd65983776bab164283673f3ad43ea50d2d`.
+SHA-256 (including lock indicators and the Fn+F10/F11 release-order fix):
+`7d6946742519bcfba783049e5072b640a3c09034bb1c23709f6fc9af2fd83e80`.
 The previously tested lock-indicator image had SHA-256
 `3409b2abbf94231fb93c0625076f248f91e4adc4dbb7818ba98ce8defd5fafb3`;
 it is retained locally as `firmware/build/aukey-km-g6_stock-pwm-before-fn-volume.hex`.
-The volume-shortcut update changes only two Fn-layer entries and has passed
-compilation, host keymap/consumer-code checks, and interrupt checks; hardware
-validation is pending.
+The original volume shortcuts could remain held when Fn was released first.
+The matrix now caches each keycode on press and uses it on release, and no
+longer clears unrelated held keys when Fn is released. Regression tests
+reproduce the original stuck-volume bug and pass with the fix for both volume
+keys, both release orders, base-layer presses across Fn changes, and unrelated
+held keys. SDCC compilation and the 14-vector interrupt check pass; hardware
+validation of the fix is pending. The keycode cache uses 252 bytes of RAM.
 The build script now writes that separate candidate filename. The previous
 working default image and its pinned hash are preserved. The guarded flash
 command selects the candidate only with `--stock-pwm-candidate`, checking
