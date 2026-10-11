@@ -169,8 +169,9 @@ The matrix now caches each keycode on press and uses it on release, and no
 longer clears unrelated held keys when Fn is released. Regression tests
 reproduce the original stuck-volume bug and pass with the fix for both volume
 keys, both release orders, base-layer presses across Fn changes, and unrelated
-held keys. SDCC compilation and the 14-vector interrupt check pass; hardware
-validation of the fix is pending. The keycode cache uses 252 bytes of RAM.
+held keys. SDCC compilation and the 14-vector interrupt check pass. The user
+confirmed the fix on hardware on 2026-10-11, flashing the image with ~5 ms key
+debounce (SHA-256 `7dd6dada…065f`). The keycode cache uses 252 bytes of RAM.
 The guarded flash command now writes only this candidate, checking its pinned
 hash; the earlier default image is no longer built or selectable. Add
 `--dry-run` to verify hashes without device access.

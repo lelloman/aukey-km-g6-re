@@ -66,8 +66,9 @@ only debounce was two row samples 10 µs apart, while switch contacts bounce for
 milliseconds and the matrix is scanned roughly every 0.8 ms. The scan now
 publishes the raw matrix only after it has been stable for 6 consecutive scans
 (about 5 ms, QMK's default global deferred debounce). `firmware/test-debounce.py`
-fails on the previous scan code and passes with the fix. Hardware validation
-is pending. Its SHA-256 is
+fails on the previous scan code and passes with the fix. On 2026-10-11 the
+user flashed this image and confirmed on hardware that the repeated characters
+are gone and the Fn+F10/F11 volume keys work. Its SHA-256 is
 `7dd6dada98cc4c5bd846ba496e362f3a418918a1eeae5843aedc9ab907a2065f`.
 
 The active-low LED-row correction produces SHA-256
