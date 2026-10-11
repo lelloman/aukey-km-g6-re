@@ -156,8 +156,11 @@ source. No keyboard writes or flashing were performed during the build;
 the user subsequently tested the candidate on hardware.
 
 Candidate: `firmware/build/aukey-km-g6_stock-pwm-candidate.hex`
-SHA-256 (including lock indicators and the Fn+F10/F11 release-order fix):
-`7d6946742519bcfba783049e5072b640a3c09034bb1c23709f6fc9af2fd83e80`.
+SHA-256 (including lock indicators, the Fn+F10/F11 release-order fix and
+~5 ms key debounce): `7dd6dada98cc4c5bd846ba496e362f3a418918a1eeae5843aedc9ab907a2065f`.
+The release-order-fix image without debounce had SHA-256
+`7d6946742519bcfba783049e5072b640a3c09034bb1c23709f6fc9af2fd83e80`;
+it repeated characters when switch contacts bounced.
 The previously tested lock-indicator image had SHA-256
 `3409b2abbf94231fb93c0625076f248f91e4adc4dbb7818ba98ce8defd5fafb3`;
 it is retained locally as `firmware/build/aukey-km-g6_stock-pwm-before-fn-volume.hex`.

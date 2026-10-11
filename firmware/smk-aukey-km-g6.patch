@@ -1016,30 +1016,52 @@ index 81ef41a..df6a294 100644
          usb_ep0_state = 0;
          CLEAR_EP0_CNT;
 diff --git a/src/smk/matrix.c b/src/smk/matrix.c
-index 0044791..1d0d825 100644
+index 0044791..e6fcd7b 100644
 --- a/src/smk/matrix.c
 +++ b/src/smk/matrix.c
-@@ -24,6 +24,9 @@ uint8_t action_layer;
-
+@@ -18,21 +18,38 @@ typedef uint8_t matrix_col_t;
+ matrix_col_t matrix[MATRIX_COLS];
+ matrix_col_t matrix_previous[MATRIX_COLS];
+ 
++// Switch contacts bounce for a few ms; a scan runs every ~0.8 ms, so publish the
++// raw matrix only after it has held still for ~5 ms (global deferred debounce).
++#ifndef DEBOUNCE_SCANS
++#    define DEBOUNCE_SCANS 6
++#endif
++
++static matrix_col_t matrix_raw[MATRIX_COLS];
++static uint8_t      matrix_stable_scans;
++
+ volatile bool matrix_updated;
+ 
+ uint8_t action_layer;
+ 
  uint8_t default_layer;
-
+ 
 +// Pair each release with the keycode selected on press, even after Fn changes.
 +static uint16_t pressed_keycodes[MATRIX_COLS][MATRIX_ROWS];
 +
  void matrix_init()
  {
-     action_layer   = 0;
-@@ -33,6 +36,9 @@ void matrix_init()
+-    action_layer   = 0;
+-    default_layer  = 0;
+-    matrix_updated = false;
++    action_layer        = 0;
++    default_layer       = 0;
++    matrix_updated      = false;
++    matrix_stable_scans = DEBOUNCE_SCANS;
+ 
      for (int i = 0; i < MATRIX_COLS; i++) {
          matrix[i]          = 0;
          matrix_previous[i] = 0;
++        matrix_raw[i]      = 0;
 +        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
 +            pressed_keycodes[i][row] = KC_NO;
 +        }
      }
  }
-
-@@ -92,13 +98,19 @@ static void process_key_state(uint8_t row, uint8_t col, bool pressed)
+ 
+@@ -92,13 +109,19 @@ static void process_key_state(uint8_t row, uint8_t col, bool pressed)
          if (pressed) {
              action_layer = QK_MOMENTARY_GET_LAYER(base);
          } else {
@@ -1048,7 +1070,7 @@ index 0044791..1d0d825 100644
          }
          return;
      }
-
+ 
 -    const uint16_t qcode = resolve_keycode(base, row, col);
 +    uint16_t qcode;
 +    if (pressed) {
@@ -1058,6 +1080,42 @@ index 0044791..1d0d825 100644
 +        qcode = pressed_keycodes[col][row];
 +        pressed_keycodes[col][row] = KC_NO;
 +    }
-
+ 
      if (!kb_process_record(qcode, pressed)) {
          return;
+@@ -120,6 +143,8 @@ void matrix_scan_full(void)
+     user_matrix_scan_pre();
+     user_matrix_cols_deselect_all();
+ 
++    bool raw_changed = false;
++
+     for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+         user_matrix_col_select(col);
+ 
+@@ -128,8 +153,9 @@ void matrix_scan_full(void)
+         delay_us(10);
+         const uint8_t sample2 = user_matrix_read_rows();
+ 
+-        if (sample1 == sample2) {
+-            matrix[col] = ~sample1;
++        if (sample1 == sample2 && matrix_raw[col] != (matrix_col_t)~sample1) {
++            matrix_raw[col] = ~sample1;
++            raw_changed     = true;
+         }
+ 
+         user_matrix_col_deselect(col);
+@@ -139,6 +165,14 @@ void matrix_scan_full(void)
+ 
+     indicators_pwm_enable();
+ 
++    if (raw_changed) {
++        matrix_stable_scans = 0;
++    } else if (matrix_stable_scans < DEBOUNCE_SCANS && ++matrix_stable_scans == DEBOUNCE_SCANS) {
++        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
++            matrix[col] = matrix_raw[col];
++        }
++    }
++
+     matrix_updated = true;
+ }
+ 

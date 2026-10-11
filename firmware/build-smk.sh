@@ -13,6 +13,7 @@ git -C "$work_dir/smk" checkout --quiet "$smk_revision"
 git -C "$work_dir/smk" apply "$repo_root/firmware/smk-aukey-km-g6.patch"
 
 python3 "$repo_root/firmware/test-fn-volume.py" "$work_dir/smk"
+python3 "$repo_root/firmware/test-debounce.py" "$work_dir/smk"
 python3 "$repo_root/firmware/test-lock-indicators.py"
 
 mkdir -p "$repo_root/firmware/build"

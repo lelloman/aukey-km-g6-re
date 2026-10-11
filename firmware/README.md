@@ -35,8 +35,17 @@ before F10/F11: the release was resolved on the base layer, leaving the consumer
 key held. The matrix now remembers each pressed keycode until its release, and
 releasing Fn preserves unrelated held keys. The build runs a host regression
 test for both volume keys and both release orders, plus base-key presses across
-Fn changes. Hardware validation of this fix is pending. Its SHA-256 is
+Fn changes. That image had SHA-256
 `7d6946742519bcfba783049e5072b640a3c09034bb1c23709f6fc9af2fd83e80`.
+
+That image could emit short bursts of a character (seen on M and Enter): its
+only debounce was two row samples 10 µs apart, while switch contacts bounce for
+milliseconds and the matrix is scanned roughly every 0.8 ms. The scan now
+publishes the raw matrix only after it has been stable for 6 consecutive scans
+(about 5 ms, QMK's default global deferred debounce). `firmware/test-debounce.py`
+fails on the previous scan code and passes with the fix. Hardware validation
+is pending. Its SHA-256 is
+`7dd6dada98cc4c5bd846ba496e362f3a418918a1eeae5843aedc9ab907a2065f`.
 
 The active-low LED-row correction produces SHA-256
 `3357372b13a94605b2717ce0ff391144434bd2bcc6feaf22a78fae3922c00fad`.
