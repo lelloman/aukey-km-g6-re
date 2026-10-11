@@ -9,17 +9,40 @@ report `0x09`; the host operating system's Italian layout provides the printed
 Italian characters. The user has tested typing, per-key brightness and lock
 indicators. USB behavior and recovery are not comprehensively validated.
 
-Run `firmware/build-smk.sh` to clone the pinned SMK revision, apply the target
-patch, and compile it in a Debian Trixie container with SDCC 4.5. The script
-does not access or write the keyboard.
+## From a fresh clone
 
-The current patch builds a separate stock-PWM candidate at
-`firmware/build/aukey-km-g6_stock-pwm-candidate.hex`, using the traced stock
-control bytes and column-before-row ordering. It does not overwrite the
-previous working default image. The guarded flash command defaults to the
-previous image; `--stock-pwm-candidate` explicitly selects the separately
-hash-pinned candidate. See [the brightness audit](../docs/BRIGHTNESS-AUDIT.md#stock-pwm-candidate-implementation)
-for the candidate hash, validation and remaining timing limitations.
+Requirements: Linux, `sudo`, git, python3, a C compiler, Docker, Rust 1.88+
+(cargo), and network access for the first build. Then:
+
+```sh
+firmware/build-smk.sh          # firmware image (Docker); never touches the keyboard
+firmware/build-sinowisp.sh     # pinned flasher; run without sudo
+sudo firmware/backup-stock.sh  # once, while the keyboard still runs stock firmware
+firmware/check-readiness.sh    # local checks only
+sudo firmware/flash-experimental.sh --yes-i-accept-brick-risk
+```
+
+`build-smk.sh` clones the pinned SMK revision, applies the target patch, runs
+the host regression tests, and compiles in a digest-pinned Debian Trixie
+container whose packages (SDCC 4.5.0, meson 1.7.0) come from a fixed
+snapshot.debian.org date, so the output matches the hash pinned in
+`flash-experimental.sh`. `build-sinowisp.sh` clones sinowisp at a pinned
+commit into `firmware/build/sinowisp`, which persists across reboots.
+
+`backup-stock.sh` reads the full 64 KiB flash twice (replug the keyboard
+between reads), refuses to continue if the reads differ, extracts the 60 KiB
+application region (the first 61440 bytes) for `restore-stock.sh`, and records
+both hashes in `hardware/backups/SHA256SUMS`. It reports whether the dump
+matches the reference KM-G6 stock dump. It refuses to overwrite existing
+backups or to run when the keyboard already reports SMK. Note that even a read
+may touch flash metadata (see the top-level README); copy the backups to
+another disk before flashing.
+
+The patch builds `firmware/build/aukey-km-g6_stock-pwm-candidate.hex`, using
+the traced stock control bytes and column-before-row ordering. It is the only
+image the flash command writes; `--stock-pwm-candidate` is still accepted for
+old commands. See [the brightness audit](../docs/BRIGHTNESS-AUDIT.md#stock-pwm-candidate-implementation)
+for validation and remaining timing limitations.
 
 The candidate also implements stock's active-low Num/Caps/Scroll Lock
 indicators on P0.2/P0.3/P0.4, with output direction and pull-ups enabled.
@@ -66,20 +89,15 @@ write scripts require explicit acknowledgement flags and verify pinned hashes
 before invoking sinowisp:
 
 ```text
+firmware/flash-experimental.sh --yes-i-accept-brick-risk --dry-run
 sudo firmware/flash-experimental.sh --yes-i-accept-brick-risk
 sudo firmware/restore-stock.sh --restore-verified-stock
 ```
 
-To explicitly test the stock-PWM candidate, first verify without accessing
-the keyboard, then flash only if accepting the recovery risk below:
-
-```sh
-firmware/flash-experimental.sh --stock-pwm-candidate --yes-i-accept-brick-risk --dry-run
-sudo firmware/flash-experimental.sh --stock-pwm-candidate --yes-i-accept-brick-risk
-```
-
-Unknown arguments are rejected. `--dry-run` checks the selected image and
-stock recovery hashes without requiring sinowisp or touching a device.
+Unknown arguments are rejected. `--dry-run` checks the image hash and the
+stock backup against `hardware/backups/SHA256SUMS` without requiring sinowisp
+or touching a device. The write scripts need `sudo` because the keyboard's
+hidraw devices are root-only; without it sinowisp reports "Device not found".
 
 Do not run the flash command merely because it exists. PC-only restoration
 requires the application to initialize USB and accept report `0x05`. Analysis

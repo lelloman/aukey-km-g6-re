@@ -171,10 +171,9 @@ reproduce the original stuck-volume bug and pass with the fix for both volume
 keys, both release orders, base-layer presses across Fn changes, and unrelated
 held keys. SDCC compilation and the 14-vector interrupt check pass; hardware
 validation of the fix is pending. The keycode cache uses 252 bytes of RAM.
-The build script now writes that separate candidate filename. The previous
-working default image and its pinned hash are preserved. The guarded flash
-command selects the candidate only with `--stock-pwm-candidate`, checking
-its separate pinned hash. Add `--dry-run` to verify hashes without device access.
+The guarded flash command now writes only this candidate, checking its pinned
+hash; the earlier default image is no longer built or selectable. Add
+`--dry-run` to verify hashes without device access.
 
 ### Lock indicators
 
